@@ -1,27 +1,36 @@
-package br.com.kuntzedev.moneymaster.entities;
+package br.com.kuntzedev.moneymaster.dtos;
 
 import java.io.Serializable;
-import java.util.Objects;
 
-import javax.persistence.Embeddable;
-
+import br.com.kuntzedev.moneymaster.entities.Address;
 import br.com.kuntzedev.moneymaster.enums.AddressType;
 
-@Embeddable
-public class Address implements Serializable {
+public class AddressDTO implements Serializable {
 	private static final long serialVersionUID = -7243842609474326837L;
 	
-	private String addressLine; //Logradouro
+	private String addressLine;
 	private String number;
-	private String district; //bairro
+	private String district;
 	private String city;
 	private String state;
 	private String zipCode;
 	private String country;
-	private String additionalDetails; //complemento
+	private String additionalDetails;
 	private AddressType addressType;
 	
-	public Address() {
+	public AddressDTO() {
+	}
+	
+	public AddressDTO(Address address) {
+		this.addressLine = address.getAddressLine();
+		this.number = address.getNumber();
+		this.district = address.getDistrict();
+		this.city = address.getCity();
+		this.state = address.getState();
+		this.zipCode = address.getZipCode();
+		this.country = address.getCountry();
+		this.additionalDetails = address.getAdditionalDetails();
+		this.addressType = address.getAddressType();
 	}
 
 	public String getAddressLine() {
@@ -97,25 +106,9 @@ public class Address implements Serializable {
 	}
 
 	@Override
-	public int hashCode() {
-		return Objects.hash(addressLine, zipCode);
-	}
-
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		Address other = (Address) obj;
-		return Objects.equals(addressLine, other.addressLine) && Objects.equals(zipCode, other.zipCode);
-	}
-
-	@Override
 	public String toString() {
-		return "Address [addressLine=" + addressLine + ", number=" + number + ", district=" + district + ", city="
-				+ city + ", state=" + state + ", zipCode=" + zipCode + "]";
+		return "AddressDTO [addressLine=" + addressLine + ", number=" + number + ", district=" + district + ", city="
+				+ city + ", state=" + state + ", zipCode=" + zipCode + ", country=" + country + ", additionalDetails="
+				+ additionalDetails + ", addressType=" + addressType + "]";
 	}
 }
