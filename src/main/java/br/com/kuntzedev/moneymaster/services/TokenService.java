@@ -14,6 +14,7 @@ import br.com.kuntzedev.moneymaster.entities.tokens.VerificationToken;
 import br.com.kuntzedev.moneymaster.repositories.UserRepository;
 import br.com.kuntzedev.moneymaster.repositories.tokens.PasswordRecoveryTokenRepository;
 import br.com.kuntzedev.moneymaster.repositories.tokens.VerificationTokenRepository;
+import br.com.kuntzedev.moneymaster.services.exceptions.InvalidTokenException;
 import br.com.kuntzedev.moneymaster.services.exceptions.ResourceNotFoundException;
 import br.com.kuntzedev.moneymaster.services.exceptions.UnprocessableRequestException;
 
@@ -31,6 +32,8 @@ public class TokenService {
 	
 	private static final String RNFE = "Resource not found in the database.";
 	private static final String NULL_PARAM = "Null parameter.";
+	private static final String ITE = "The token is ";
+	private static final String ITE_EXPIRED = "expired";
 	
 	@Transactional(readOnly = true)
 	public VerificationToken findVerificationTokenByToken(String token) {
@@ -56,7 +59,12 @@ public class TokenService {
 	
 	@Transactional(readOnly = true)
 	public User findUserByRecoveryToken(String token) {
-		return userRepository.findByRecoveryToken(token);
+		User user = userRepository.findByRecoveryToken(token);
+		if(user == null) {
+			throw new ResourceNotFoundException("Could not find user by the provided token.");
+		}
+		
+		return user;
 	}
 	
 	@Transactional
@@ -81,20 +89,38 @@ public class TokenService {
 		}
 	}
 	
-	public String validatePasswordRecoveryToken(String token) {
+	@Transactional
+	public boolean deleteVerificationToken(String token) {
+		int rows = verificationTokenRepository.deleteVerificationTokenByTokenNumber(token);
+		if(rows == 0) {
+			return false;
+		}
+		
+		return true;
+	}
+	
+	@Transactional
+	public boolean deleteRecoveryToken(String token) {
+		int rows = passwordRecoveryTokenRepository.deleteRecoveryTokenByTokenNumber(token);
+		if(rows == 0) {
+			return false;
+		}
+		
+		return true;
+	}
+	
+	public void validatePasswordRecoveryToken(String token) {
 		Optional<PasswordRecoveryToken> tk = passwordRecoveryTokenRepository.findByToken(token);
 		Calendar calendar = Calendar.getInstance();
 		
 		boolean expired = tk.get().getExpiryDate().before(calendar.getTime());
 		
 		if(tk.isEmpty()) {
-			return "invalidToken";
+			throw new ResourceNotFoundException(RNFE);
 		}
 		
 		if(expired) {
-			return "expired";
-		} else {
-			return "valid";
+			throw new InvalidTokenException(ITE + ITE_EXPIRED);
 		}
 	}
 }

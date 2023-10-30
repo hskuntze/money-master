@@ -12,8 +12,6 @@ import javax.persistence.JoinColumn;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
 @Entity
 @Table(name = "tb_vault")
 public class Vault implements Serializable {
@@ -64,14 +62,58 @@ public class Vault implements Serializable {
 	public void setAllowedToSpend(BigDecimal allowedToSpend) {
 		this.allowedToSpend = allowedToSpend;
 	}
-
-	@JsonIgnore
-	public User getUser() {
-		return user;
-	}
-
+	
 	public void setUser(User user) {
 		this.user = user;
+	}
+
+	public BigDecimal increaseWalletValue(BigDecimal value) {
+		BigDecimal newValue = this.onWallet.add(value);
+		this.setOnWallet(newValue);
+		return this.getOnWallet();
+	}
+	
+	/**
+	 * Apenas "onWallet" poderá conter valores negativos.
+	 */
+	public BigDecimal reduceWalletValue(BigDecimal value) {
+		BigDecimal newValue = this.onWallet.subtract(value);
+		this.setOnWallet(newValue);
+		return this.getOnWallet();
+	}
+	
+	public BigDecimal increaseSavingsValue(BigDecimal value) {
+		BigDecimal newValue = this.savings.add(value);
+		this.setSavings(newValue);
+		return this.getSavings();
+	}
+	
+	public BigDecimal reduceSavingsValue(BigDecimal value) {
+		BigDecimal newValue = this.savings.subtract(value);
+		
+		if(newValue.signum() <= 0) {
+			newValue = BigDecimal.ZERO;
+		}
+		
+		this.setSavings(newValue);
+		return this.getSavings();
+	}
+	
+	public BigDecimal increaseAllowedToSpendValue(BigDecimal value) {
+		BigDecimal newValue = this.allowedToSpend.add(value);
+		this.setAllowedToSpend(newValue);
+		return this.getAllowedToSpend();
+	}
+	
+	public BigDecimal reduceAllowedToSpendValue(BigDecimal value) {
+		BigDecimal newValue = this.allowedToSpend.subtract(value);
+		
+		if(newValue.signum() <= 0) {
+			newValue = BigDecimal.ZERO;
+		}
+		
+		this.setAllowedToSpend(newValue);
+		return this.getAllowedToSpend();
 	}
 
 	@Override
