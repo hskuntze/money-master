@@ -11,8 +11,8 @@ public interface UserRepository extends JpaRepository<User, Long>{
 
 	User findByEmail(String email);
 
-	@Query(nativeQuery = true, value = "SELECT id, email, name, id_number, enabled FROM tb_user "
-			+ " INNER JOIN tb_rocovery_token ON id = tb_recovery_token.user_id "
-			+ " WHERE tb_recovery_token.token = :token")
+	@Query(nativeQuery = true, value = "SELECT * FROM tb_user u "
+			+ " INNER JOIN tb_recovery_token rt ON u.id = rt.user_id "
+			+ " WHERE rt.token = :token")
 	User findByRecoveryToken(String token);
 }

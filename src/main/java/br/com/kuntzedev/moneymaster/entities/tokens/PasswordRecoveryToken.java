@@ -8,7 +8,7 @@ import javax.persistence.Table;
 import br.com.kuntzedev.moneymaster.entities.User;
 
 @Entity
-@Table(name = "tb_rocovery_token")
+@Table(name = "tb_recovery_token")
 public class PasswordRecoveryToken extends AbstractToken {
 
 	public PasswordRecoveryToken() {
