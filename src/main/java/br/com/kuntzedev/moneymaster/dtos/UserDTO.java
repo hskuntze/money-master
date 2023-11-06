@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Set;
+
 import br.com.kuntzedev.moneymaster.entities.User;
 import br.com.kuntzedev.moneymaster.enums.GenderType;
 import br.com.kuntzedev.moneymaster.services.validators.VerifyUserExistence;
@@ -122,16 +123,16 @@ public class UserDTO implements Serializable {
 		this.address = address;
 	}
 
-	public Set<RoleDTO> getRoles() {
-		return roles;
-	}
-
 	public VaultDTO getVault() {
 		return vault;
 	}
 
 	public void setVault(VaultDTO vault) {
 		this.vault = vault;
+	}
+
+	public Set<RoleDTO> getRoles() {
+		return roles;
 	}
 
 	@Override

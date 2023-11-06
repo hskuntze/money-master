@@ -2,8 +2,10 @@ package br.com.kuntzedev.moneymaster.entities;
 
 import java.io.Serializable;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -17,6 +19,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
+import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
@@ -47,14 +50,20 @@ public class User implements Serializable, UserDetails {
 	@Embedded
 	private Address address;
 	
+	@OneToOne(mappedBy = "user")
+	private Vault vault;
+	
+	@OneToOne(mappedBy = "user")
+	private ExpenseTrack expenseTrack;
+	
 	@ManyToMany(fetch = FetchType.EAGER)
 	@JoinTable(name = "tb_user_role",
 				joinColumns = @JoinColumn(name = "user_id"),
 				inverseJoinColumns = @JoinColumn(name = "role_id"))
 	private Set<Role> roles = new HashSet<>();
 	
-	@OneToOne(mappedBy = "user")
-	private Vault vault;
+	@OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
+	private List<Wishlist> wishlists = new ArrayList<>();
 	
 	public User() {
 	}
@@ -157,6 +166,18 @@ public class User implements Serializable, UserDetails {
 
 	public void setVault(Vault vault) {
 		this.vault = vault;
+	}
+
+	public List<Wishlist> getWishlists() {
+		return wishlists;
+	}
+
+	public ExpenseTrack getExpenseTrack() {
+		return expenseTrack;
+	}
+
+	public void setExpenseTrack(ExpenseTrack expenseTrack) {
+		this.expenseTrack = expenseTrack;
 	}
 
 	@Override

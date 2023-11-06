@@ -1,0 +1,31 @@
+INSERT INTO tb_expense_track (monthly_income, anual_income, extra_income, day_of_salary_payment, fluctuation_by_month, user_id) VALUES (1000.0, 12500.0, 500.0, 5, 0.0, 1);
+
+INSERT INTO tb_total_expense_by_month (date, total_expended, remaining_amount, expense_track_id) VALUES ('2023-09-30', 2941.41, 258.59, 1);
+INSERT INTO tb_total_expense_by_month (date, total_expended, remaining_amount, expense_track_id) VALUES ('2023-10-31', 3105.19, 94.81, 1);
+INSERT INTO tb_total_expense_by_month (date, total_expended, remaining_amount, expense_track_id) VALUES ('2023-11-30', 1892.66, 1307.34, 1);
+
+INSERT INTO tb_variable_expense (title, price, date_of_charge, month_id) VALUES ('iFood', 29.91, '2023-10-31', 2);
+INSERT INTO tb_variable_expense (title, price, date_of_charge, month_id) VALUES ('iFood', 41.22, '2023-10-20', 2);
+INSERT INTO tb_variable_expense (title, price, date_of_charge, month_id) VALUES ('Restaurante das Flores', 76.02, '2023-09-01', 1);
+INSERT INTO tb_variable_expense (title, price, date_of_charge, month_id) VALUES ('Amazon LTDA', 165.00, '2023-10-16', 2);
+INSERT INTO tb_variable_expense (title, price, date_of_charge, month_id) VALUES ('Geraldo das Flores', 55.00, '2023-09-01', 1);
+INSERT INTO tb_variable_expense (title, price, date_of_charge, month_id) VALUES ('FlyHigh Indoor Skydiving', 500.00, '2023-11-01', 3);
+INSERT INTO tb_variable_expense (title, price, date_of_charge, month_id) VALUES ('iFood', 29.20, '2023-10-30', 2);
+
+INSERT INTO tb_fixed_expense (title, price, day_of_charge, month_id) VALUES ('Netflix', 37.99, 4, 1);
+INSERT INTO tb_fixed_expense (title, price, day_of_charge, month_id) VALUES ('Prime Video', 14.0, 4, 1);
+INSERT INTO tb_fixed_expense (title, price, day_of_charge, month_id) VALUES ('MS365', 36.0, 10, 1);
+INSERT INTO tb_fixed_expense (title, price, day_of_charge, month_id) VALUES ('SmartFit', 126.0, 10, 1);
+INSERT INTO tb_fixed_expense (title, price, day_of_charge, month_id) VALUES ('SmartFit Nutri', 40.0, 22, 1);
+
+INSERT INTO tb_fixed_expense (title, price, day_of_charge, month_id) VALUES ('Netflix', 37.99, 4, 2);
+INSERT INTO tb_fixed_expense (title, price, day_of_charge, month_id) VALUES ('Prime Video', 14.0, 4, 2);
+INSERT INTO tb_fixed_expense (title, price, day_of_charge, month_id) VALUES ('MS365', 36.0, 10, 2);
+INSERT INTO tb_fixed_expense (title, price, day_of_charge, month_id) VALUES ('SmartFit', 126.0, 10, 2);
+INSERT INTO tb_fixed_expense (title, price, day_of_charge, month_id) VALUES ('SmartFit Nutri', 40.0, 22, 2);
+
+INSERT INTO tb_fixed_expense (title, price, day_of_charge, month_id) VALUES ('Netflix', 37.99, 4, 3);
+INSERT INTO tb_fixed_expense (title, price, day_of_charge, month_id) VALUES ('Prime Video', 14.0, 4, 3);
+INSERT INTO tb_fixed_expense (title, price, day_of_charge, month_id) VALUES ('MS365', 36.0, 10, 3);
+INSERT INTO tb_fixed_expense (title, price, day_of_charge, month_id) VALUES ('SmartFit', 126.0, 10, 3);
+INSERT INTO tb_fixed_expense (title, price, day_of_charge, month_id) VALUES ('SmartFit Nutri', 40.0, 22, 3);
