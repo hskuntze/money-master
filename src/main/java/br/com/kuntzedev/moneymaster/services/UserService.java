@@ -62,7 +62,7 @@ public class UserService implements UserDetailsService {
 	
 	@Transactional(readOnly = true)
 	public UserDTO findUserById(Long id) {
-		User user = userRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("User with ID " + id + RNFE2));
+		User user = userRepository.findUser(id).orElseThrow(() -> new ResourceNotFoundException("User with ID " + id + RNFE2));
 		return new UserDTO(user);
 	}
 	
@@ -79,6 +79,15 @@ public class UserService implements UserDetailsService {
 	public User findReference(Long id) {
 		if(id != null) {
 			return userRepository.getReferenceById(id);
+		} else {
+			throw new UnprocessableRequestException(NULL_PARAM);
+		}
+	}
+	
+	@Transactional(readOnly = true)
+	public User findEntity(Long id) {
+		if(id != null) {
+			return userRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("User with ID " + id + RNFE2));
 		} else {
 			throw new UnprocessableRequestException(NULL_PARAM);
 		}

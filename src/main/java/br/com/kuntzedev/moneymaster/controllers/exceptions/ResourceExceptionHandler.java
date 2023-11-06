@@ -15,10 +15,13 @@ import br.com.kuntzedev.moneymaster.services.exceptions.BadFormattingException;
 import br.com.kuntzedev.moneymaster.services.exceptions.EmailException;
 import br.com.kuntzedev.moneymaster.services.exceptions.InvalidPasswordException;
 import br.com.kuntzedev.moneymaster.services.exceptions.InvalidTokenException;
+import br.com.kuntzedev.moneymaster.services.exceptions.ResourceAlreadyExistsException;
 import br.com.kuntzedev.moneymaster.services.exceptions.ResourceNotFoundException;
 import br.com.kuntzedev.moneymaster.services.exceptions.UnprocessableRequestException;
 import br.com.kuntzedev.moneymaster.services.exceptions.UserAlreadyEnabledException;
 import br.com.kuntzedev.moneymaster.services.exceptions.UserAlreadyExistsException;
+import br.com.kuntzedev.moneymaster.services.scraping.exceptions.AmazonConnectionException;
+import br.com.kuntzedev.moneymaster.services.scraping.exceptions.InvalidLinkException;
 
 @RestControllerAdvice
 public class ResourceExceptionHandler {
@@ -138,6 +141,47 @@ public class ResourceExceptionHandler {
 		err.setStatus(st.value());
 		err.setMessage(e.getMessage());
 		err.setError("Already enabled");
+		err.setPath(request.getRequestURI());
+		return ResponseEntity.status(st).body(err);
+	}
+	
+	@ExceptionHandler(AmazonConnectionException.class)
+	public ResponseEntity<StandardError> amazonConnection(AmazonConnectionException e, HttpServletRequest request) {
+		StandardError err = new StandardError();
+		HttpStatus st;
+		if(e.getStatus() == null) {
+			st = HttpStatus.INTERNAL_SERVER_ERROR;
+		} else {
+			st = HttpStatus.valueOf(e.getStatus());
+		}
+		err.setTimestamp(Instant.now());
+		err.setStatus(st.value());
+		err.setMessage(e.getMessage());
+		err.setError("Amazon exception");
+		err.setPath(request.getRequestURI());
+		return ResponseEntity.status(st).body(err);
+	}
+	
+	@ExceptionHandler(InvalidLinkException.class)
+	public ResponseEntity<StandardError> linkException(InvalidLinkException e, HttpServletRequest request) {
+		StandardError err = new StandardError();
+		HttpStatus st = HttpStatus.BAD_REQUEST;
+		err.setTimestamp(Instant.now());
+		err.setStatus(st.value());
+		err.setMessage(e.getMessage());
+		err.setError("Scraping exception");
+		err.setPath(request.getRequestURI());
+		return ResponseEntity.status(st).body(err);
+	}
+	
+	@ExceptionHandler(ResourceAlreadyExistsException.class)
+	public ResponseEntity<StandardError> resourceAlreadyExists(ResourceAlreadyExistsException e, HttpServletRequest request) {
+		StandardError err = new StandardError();
+		HttpStatus st = HttpStatus.CONFLICT;
+		err.setTimestamp(Instant.now());
+		err.setStatus(st.value());
+		err.setMessage(e.getMessage());
+		err.setError("Resource already exists");
 		err.setPath(request.getRequestURI());
 		return ResponseEntity.status(st).body(err);
 	}
