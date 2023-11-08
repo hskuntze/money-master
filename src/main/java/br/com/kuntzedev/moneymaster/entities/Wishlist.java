@@ -42,6 +42,9 @@ public class Wishlist implements Serializable {
 	@OneToMany(mappedBy = "wishlist", fetch = FetchType.LAZY)
 	private List<Item> items = new ArrayList<>();
 	
+	@OneToMany(mappedBy = "wishlist", fetch = FetchType.LAZY)
+	private List<Installment> installments = new ArrayList<>();
+	
 	public Wishlist() {
 	}
 	
@@ -78,7 +81,8 @@ public class Wishlist implements Serializable {
 	}
 
 	public BigDecimal getTotalValue() {
-		return totalValue;
+		//return totalValue;
+		return calculateTotalValue();
 	}
 
 	public void setTotalValue(BigDecimal totalValue) {
@@ -145,8 +149,18 @@ public class Wishlist implements Serializable {
 		return items;
 	}
 
-	public void setItems(List<Item> items) {
-		this.items = items;
+	public List<Installment> getInstallments() {
+		return installments;
+	}
+	
+	public BigDecimal calculateTotalValue() {
+		BigDecimal total = BigDecimal.ZERO;
+		
+		for(Item item : this.items) {
+			total = total.add(item.getPrice());
+		}
+		
+		return total;
 	}
 
 	@Override

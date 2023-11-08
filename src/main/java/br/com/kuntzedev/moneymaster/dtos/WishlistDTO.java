@@ -26,6 +26,7 @@ public class WishlistDTO implements Serializable {
 	
 	private UserBasicDTO user;
 	private List<ItemDTO> items = new ArrayList<>();
+	private List<InstallmentDTO> installments = new ArrayList<>();
 	
 	public WishlistDTO() {
 	}
@@ -44,7 +45,11 @@ public class WishlistDTO implements Serializable {
 		
 		this.user = new UserBasicDTO(entity.getUser());
 		
+		this.items.clear();
 		entity.getItems().forEach(item -> this.items.add(new ItemDTO(item)));
+		
+		this.installments.clear();
+		entity.getInstallments().forEach(installment -> this.installments.add(new InstallmentDTO(installment)));
 	}
 
 	public Long getId() {
@@ -128,6 +133,10 @@ public class WishlistDTO implements Serializable {
 	
 	public List<ItemDTO> getItems() {
 		return items;
+	}
+
+	public List<InstallmentDTO> getInstallments() {
+		return installments;
 	}
 
 	@JsonIgnore

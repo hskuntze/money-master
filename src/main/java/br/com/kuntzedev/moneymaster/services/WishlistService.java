@@ -11,7 +11,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import br.com.kuntzedev.moneymaster.dtos.WishlistDTO;
+import br.com.kuntzedev.moneymaster.entities.Installment;
+import br.com.kuntzedev.moneymaster.entities.Item;
 import br.com.kuntzedev.moneymaster.entities.Wishlist;
+import br.com.kuntzedev.moneymaster.repositories.InstallmentRepository;
 import br.com.kuntzedev.moneymaster.repositories.WishlistRepository;
 import br.com.kuntzedev.moneymaster.services.exceptions.ResourceNotFoundException;
 import br.com.kuntzedev.moneymaster.services.exceptions.UnprocessableRequestException;
@@ -21,6 +24,9 @@ public class WishlistService {
 
 	@Autowired
 	private WishlistRepository wishlistRepository;
+	
+	@Autowired
+	private InstallmentRepository installmentRepository;
 	
 	@Autowired
 	private ItemService itemService;
@@ -65,9 +71,12 @@ public class WishlistService {
 			Wishlist entity = new Wishlist();
 			
 			dtoToEntity(entity, dto);
+			
+			entity.setTotalInstallments(0);
+			entity.setTotalValue(BigDecimal.ZERO);
+			entity.setInstallmentsValue(BigDecimal.ZERO);
 			entity.setCreated(LocalDate.now());
 			entity.setUser(authenticationService.authenticated());
-			System.out.println(entity.getUser());
 			entity.setEnabled(false);
 			entity = wishlistRepository.save(entity);
 			
@@ -80,9 +89,91 @@ public class WishlistService {
 	@Transactional
 	public WishlistDTO update(Long id, WishlistDTO dto) {
 		if(id != null && dto != null) {
-			Wishlist entity = wishlistRepository.getReferenceById(id);
+			Wishlist entity = wishlistRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Resource" + RNFE2));
+			
 			dtoToEntity(entity, dto);
-			entity = wishlistRepository.save(entity);
+			
+			BigDecimal value = BigDecimal.ZERO;
+			
+			/**
+			 * Verifica se a Wishlist tem itens e se tem parcelas:
+			 * 
+			 * No primeiro caso onde tem itens e não tem parcelas;
+			 * No segundo caso onde tem itens e tem parcelas.
+			 * 
+			 * Aqui são definidos o valor total, a quantidade de parcelas, os seus respectivos valores
+			 * e por fim são criadas as novas parcelas. A lógica (por enquanto) é excluir as parcelas
+			 * antigas e registrar novas.
+			 */
+			if(!(entity.getItems().isEmpty())) {
+				value = entity.getItems().stream().map(Item::getPrice).reduce(value, BigDecimal::add);
+				
+				if(!dto.isInstallment()) {
+					//Aqui é se "installment" = false -> não tem parcelas
+					entity.setTotalInstallments(1);
+					entity.setInstallmentsValue(value);
+					entity.setTotalValue(value);
+					
+					if(entity.getInstallments().isEmpty()) {
+						Installment installment = new Installment();
+						installment.setPrice(value);
+						installment.setDateOfCharge(dto.getToBuyAt());
+						installment.setWishlist(entity);
+						
+						installmentRepository.save(installment);
+						entity.getInstallments().add(installment);
+					} else {
+						//Aqui "installment" = false e as parcelas de "entity" não são vazias, ou seja, já existem parcelas
+						entity.getInstallments().forEach(inst -> installmentRepository.deleteById(inst.getId()));
+						entity.getInstallments().clear();
+						
+						Installment installment = new Installment();
+						installment.setPrice(value);
+						installment.setDateOfCharge(dto.getToBuyAt());
+						installment.setWishlist(entity);
+						
+						installmentRepository.save(installment);
+						entity.getInstallments().add(installment);
+					}
+				} else {
+					//Aqui é se "installment" = true -> tem parcelas
+					entity.setTotalInstallments(dto.getTotalInstallments());
+					BigDecimal totalInstallments = BigDecimal.valueOf(dto.getTotalInstallments().doubleValue());
+					BigDecimal installmentValue = value.divide(totalInstallments, 2, RoundingMode.HALF_EVEN);
+					entity.setInstallmentsValue(installmentValue);
+					entity.setTotalValue(value);
+					
+					if(entity.getInstallments().isEmpty()) {
+						//Aqui "installment" = true e as parcelas de "entity" são vazias, ou seja, não existem parcelas
+						for(int i = 0; i < dto.getTotalInstallments(); i++) {
+							Installment installment = new Installment();
+							installment.setPrice(installmentValue);
+							installment.setDateOfCharge(dto.getToBuyAt().plusMonths(i));
+							installment.setWishlist(entity);
+							
+							installmentRepository.save(installment);
+							entity.getInstallments().add(installment);
+						}
+					} else {
+						//Aqui "installment" = true e as parcelas de "entity" não são vazias, ou seja, já existem parcelas
+						entity.getInstallments().forEach(inst -> installmentRepository.deleteById(inst.getId()));
+						entity.getInstallments().clear();
+						
+						for(int i = 0; i < dto.getTotalInstallments(); i++) {
+							Installment installment = new Installment();
+							installment.setPrice(installmentValue);
+							installment.setDateOfCharge(dto.getToBuyAt().plusMonths(i));
+							installment.setWishlist(entity);
+							
+							installmentRepository.save(installment);
+							entity.getInstallments().add(installment);
+						}
+					}
+				}
+			}
+			
+			wishlistRepository.save(entity);
+			
 			return new WishlistDTO(entity);
 		} else {
 			throw new UnprocessableRequestException(NULL_PARAM);
@@ -107,16 +198,6 @@ public class WishlistService {
 		entity.setEnabled(dto.isEnabled());
 		entity.setTotalValue(dto.getTotalValue());
 		entity.setToBuyAt(dto.getToBuyAt());
-		
 		entity.setInstallment(dto.isInstallment());
-		
-		if(dto.isInstallment() == false) {
-			entity.setTotalInstallments(1);
-			entity.setInstallmentsValue(dto.getTotalValue());
-		} else {
-			entity.setTotalInstallments(dto.getTotalInstallments());
-			BigDecimal totalInstallments = BigDecimal.valueOf(dto.getTotalInstallments().doubleValue());
-			entity.setInstallmentsValue(dto.getTotalValue().divide(totalInstallments, 4, RoundingMode.HALF_EVEN));
-		}
 	}
 }

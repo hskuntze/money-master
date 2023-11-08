@@ -6,6 +6,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -102,6 +103,17 @@ public class TotalExpenseByMonth implements Serializable {
 			this.fixedExpenses.forEach(fe -> {
 				totalExpended = totalExpended.add(fe.getPrice());
 			});
+		}
+		
+		int month = this.date.getMonthValue();
+		
+		if(this.expenseTrack.getUser().getWishlists().size() != 0) {
+			List<Wishlist> list = this.expenseTrack.getUser().getWishlists().stream().filter(wish -> wish.getToBuyAt().getMonthValue() == month).collect(Collectors.toList());
+			if(list.size() != 0) {
+				list.forEach(el -> {
+					totalExpended = totalExpended.add(el.getInstallmentsValue());
+				});
+			}
 		}
 		
 		return totalExpended;
