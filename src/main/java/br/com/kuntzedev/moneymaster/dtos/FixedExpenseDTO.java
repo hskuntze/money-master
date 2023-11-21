@@ -2,6 +2,7 @@ package br.com.kuntzedev.moneymaster.dtos;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.time.LocalDate;
 
 import br.com.kuntzedev.moneymaster.entities.FixedExpense;
 
@@ -13,6 +14,9 @@ public class FixedExpenseDTO implements Serializable {
 	private BigDecimal price;
 	private int dayOfCharge;
 	
+	private LocalDate beginOfExpense;
+	private LocalDate endOfExpense;
+	
 	public FixedExpenseDTO() {
 	}
 	
@@ -21,6 +25,8 @@ public class FixedExpenseDTO implements Serializable {
 		this.title = entity.getTitle();
 		this.price = entity.getPrice();
 		this.dayOfCharge = entity.getDayOfCharge();
+		this.beginOfExpense = entity.getBeginOfExpense();
+		this.endOfExpense = entity.getEndOfExpense();
 	}
 
 	public Long getId() {
@@ -53,6 +59,22 @@ public class FixedExpenseDTO implements Serializable {
 
 	public void setDayOfCharge(int dateOfCharge) {
 		this.dayOfCharge = dateOfCharge;
+	}
+
+	public LocalDate getBeginOfExpense() {
+		return beginOfExpense;
+	}
+
+	public void setBeginOfExpense(LocalDate beginOfExpense) {
+		this.beginOfExpense = beginOfExpense;
+	}
+
+	public LocalDate getEndOfExpense() {
+		return endOfExpense;
+	}
+
+	public void setEndOfExpense(LocalDate endOfExpense) {
+		this.endOfExpense = endOfExpense;
 	}
 
 	@Override

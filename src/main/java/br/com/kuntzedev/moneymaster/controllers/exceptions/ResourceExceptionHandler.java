@@ -20,8 +20,8 @@ import br.com.kuntzedev.moneymaster.services.exceptions.ResourceNotFoundExceptio
 import br.com.kuntzedev.moneymaster.services.exceptions.UnprocessableRequestException;
 import br.com.kuntzedev.moneymaster.services.exceptions.UserAlreadyEnabledException;
 import br.com.kuntzedev.moneymaster.services.exceptions.UserAlreadyExistsException;
-import br.com.kuntzedev.moneymaster.services.scraping.exceptions.AmazonConnectionException;
 import br.com.kuntzedev.moneymaster.services.scraping.exceptions.InvalidLinkException;
+import br.com.kuntzedev.moneymaster.services.scraping.exceptions.ScrapingConnectionException;
 
 @RestControllerAdvice
 public class ResourceExceptionHandler {
@@ -145,8 +145,8 @@ public class ResourceExceptionHandler {
 		return ResponseEntity.status(st).body(err);
 	}
 	
-	@ExceptionHandler(AmazonConnectionException.class)
-	public ResponseEntity<StandardError> amazonConnection(AmazonConnectionException e, HttpServletRequest request) {
+	@ExceptionHandler(ScrapingConnectionException.class)
+	public ResponseEntity<StandardError> amazonConnection(ScrapingConnectionException e, HttpServletRequest request) {
 		StandardError err = new StandardError();
 		HttpStatus st;
 		if(e.getStatus() == null) {
@@ -157,7 +157,7 @@ public class ResourceExceptionHandler {
 		err.setTimestamp(Instant.now());
 		err.setStatus(st.value());
 		err.setMessage(e.getMessage());
-		err.setError("Amazon exception");
+		err.setError("Scraping exception");
 		err.setPath(request.getRequestURI());
 		return ResponseEntity.status(st).body(err);
 	}

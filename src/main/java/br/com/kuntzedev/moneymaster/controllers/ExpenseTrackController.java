@@ -61,6 +61,13 @@ public class ExpenseTrackController {
 		return ResponseEntity.created(uri).body(dto);
 	}
 	
+	@PostMapping(value = "/register/totalExpenseForThisMonth")
+	public ResponseEntity<ExpenseTrackDTO> createTotalExpenseByMonthForThisMonth() {
+		ExpenseTrackDTO dto = expenseTrackService.createNewTotalExpenseByMonthForThisMonth();
+		URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(dto.getId()).toUri();
+		return ResponseEntity.created(uri).body(dto);
+	}
+	
 	/**
 	 * -------------- POSTS --------------
 	 */

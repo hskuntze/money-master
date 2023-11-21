@@ -2,6 +2,7 @@ package br.com.kuntzedev.moneymaster.entities;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.time.LocalDate;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -20,6 +21,9 @@ public class FixedExpense implements Serializable {
 	private String title;
 	private BigDecimal price;
 	private int dayOfCharge;
+	
+	private LocalDate beginOfExpense;
+	private LocalDate endOfExpense;
 
 	public FixedExpense() {
 	}
@@ -60,5 +64,21 @@ public class FixedExpense implements Serializable {
 
 	public void setDayOfCharge(int dayOfCharge) {
 		this.dayOfCharge = dayOfCharge;
+	}
+
+	public LocalDate getBeginOfExpense() {
+		return beginOfExpense;
+	}
+
+	public void setBeginOfExpense(LocalDate beginOfExpense) {
+		this.beginOfExpense = beginOfExpense;
+	}
+
+	public LocalDate getEndOfExpense() {
+		return endOfExpense;
+	}
+
+	public void setEndOfExpense(LocalDate endOfExpense) {
+		this.endOfExpense = endOfExpense;
 	}
 }

@@ -11,8 +11,8 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import br.com.kuntzedev.moneymaster.dtos.AmazonItemDTO;
 import br.com.kuntzedev.moneymaster.dtos.ItemDTO;
+import br.com.kuntzedev.moneymaster.dtos.ScrapingItemDTO;
 import br.com.kuntzedev.moneymaster.entities.Item;
 import br.com.kuntzedev.moneymaster.entities.ItemHistory;
 import br.com.kuntzedev.moneymaster.entities.ItemPrice;
@@ -61,7 +61,8 @@ public class ItemService {
 			Item entity = new Item();
 			
 			dtoToEntity(entity, dto);
-			entity.setWishlist(wishlistRepository.getReferenceById(wishlistId));
+			entity.setPrice(dto.getPrice());
+			entity.setWishlist(wishlistRepository.findById(wishlistId).orElseThrow(() -> new ResourceNotFoundException("Wishlist: " + RNFE)));
 			entity = itemRepository.save(entity);
 			
 			ItemHistory history = initializeHistory(entity);
@@ -74,7 +75,7 @@ public class ItemService {
 	}
 	
 	@Transactional
-	public ItemDTO insertAmazonProduct(Long wishlistId, AmazonItemDTO dto) {
+	public ItemDTO insertScrapingProduct(Long wishlistId, ScrapingItemDTO dto) {
 		if(dto != null) {
 			Item entity = new Item();
 			
@@ -101,6 +102,21 @@ public class ItemService {
 			Item entity = itemRepository.findById(itemId).orElseThrow(() -> new ResourceNotFoundException(RNFE));
 			
 			dtoToEntity(entity, dto);
+			
+			if(!entity.getPrice().equals(dto.getPrice())) {
+				entity.setPrice(dto.getPrice());
+				
+				ItemPrice newItemPrice = new ItemPrice();
+				newItemPrice.setDate(LocalDate.now());
+				newItemPrice.setPrice(dto.getPrice());
+				newItemPrice.setItemHistory(entity.getItemHistory());
+				itemPriceRepository.save(newItemPrice);
+				
+				entity.getItemHistory().getItemPrices().add(newItemPrice);
+			}
+			
+			entity.getItemHistory().calculateFluctuation();
+			
 			entity = itemRepository.save(entity);
 			
 			return new ItemDTO(entity);
@@ -142,10 +158,6 @@ public class ItemService {
 		entity.setImage(dto.getImage());
 		entity.setLink(dto.getLink());
 		entity.setName(dto.getName());
-		entity.setPrice(dto.getPrice());
-		entity.setVariation(dto.getVariation());
-		
-		entity.setItemHistory(dto.getItemHistory());
 	}
 	
 	private ItemHistory initializeHistory(Item entity) {
@@ -157,6 +169,9 @@ public class ItemService {
 		history.setFluctuation(0f);
 		history.getItemPrices().add(itemPrice);
 		itemHistoryRepository.save(history);
+		
+		itemPrice.setItemHistory(history);
+		itemPriceRepository.save(itemPrice);
 		
 		return history;
 	}

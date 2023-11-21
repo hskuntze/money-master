@@ -52,6 +52,12 @@ public class ExpenseTrackService {
 		}
 	}
 
+	/**
+	 * Cria o primeiro "ExpenseTrack" de um usuário.
+	 * @param dto
+	 * @param businessDayOfPayment
+	 * @return
+	 */
 	@Transactional
 	public ExpenseTrackDTO createFirstExpenseTrack(ExpenseTrackDTO dto, int businessDayOfPayment) {
 		boolean exists = verifyExistence();
@@ -75,16 +81,39 @@ public class ExpenseTrackService {
 		}
 	}
 	
+	/**
+	 * Cria um "TotalExpenseByMonth" do mês atual e persistindo os gastos fixos
+	 * para o novo mês, desde que a data final do gasto fixo seja maior que a data
+	 * atual.
+	 * @return
+	 */
+	@Transactional
+	public ExpenseTrackDTO createNewTotalExpenseByMonthForThisMonth() {
+		Long userId = authenticationService.authenticated().getId();
+		ExpenseTrack et = expenseTrackRepository.findByUserId(userId).orElseThrow(() -> new ResourceNotFoundException("Uh oh... something is wrong here! You need an expense track in order to create a new montlhy expense control."));
+		
+		TotalExpenseByMonth newTebm = tebmService.newExpenseForActualMonth(et);
+		
+		et.addToTotalExpenseByMonth(newTebm);
+		et = expenseTrackRepository.save(et);
+		
+		return new ExpenseTrackDTO(et);
+	}
+	
+	/**
+	 * Cria um novo "TotalExpenseByMonth" baseado em uma data específica. Será útil
+	 * para usuários que queiram um controle retroativo dos gastos.
+	 * @param date
+	 * @return
+	 */
 	@Transactional
 	public ExpenseTrackDTO createNewTotalExpenseByMonth(String date) {
 		Long id = authenticationService.authenticated().getId();
 		ExpenseTrack et = expenseTrackRepository.findByUserId(id).orElseThrow(() -> new ResourceNotFoundException("Uh oh... something is wrong here! You need an expense track in order to create a new montlhy expense control."));
 		
-		for(TotalExpenseByMonth tebm : et.getTotalExpenseByMonths()) {
-			System.out.println(tebm.getId());
-		}
+		TotalExpenseByMonth newTebm = tebmService.newExpenseBySpecificMonth(et, LocalDate.parse(date));
 		
-		et.getTotalExpenseByMonths().add(tebmService.newExpenseBySpecificMonth(et, LocalDate.parse(date)));
+ 		et.addToTotalExpenseByMonth(newTebm);
 		et = expenseTrackRepository.save(et);
 		
 		return new ExpenseTrackDTO(et);
@@ -98,7 +127,7 @@ public class ExpenseTrackService {
 			Long id = authenticationService.authenticated().getExpenseTrack().getId();
 			ExpenseTrack et = expenseTrackRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException(RNFE));
 			
-			et.setDayOfSalaryPayment(dto.getDayOfSalaryPayment());
+			et.setDayOfSalaryPayment(et.verifyClosestPaymentDay(dto.getDayOfSalaryPayment()));
 			et.setExtraIncome(dto.getExtraIncome());
 			et.setMonthlyIncome(dto.getMonthlyIncome());
 			et.setAnualIncome();
