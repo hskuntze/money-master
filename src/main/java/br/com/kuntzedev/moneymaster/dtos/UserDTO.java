@@ -37,9 +37,12 @@ public class UserDTO implements Serializable {
 		this.idNumber = user.getIdNumber();
 		this.idType = user.getIdType();
 		this.enabled = user.isEnabled();
+		this.birth = user.getBirth();
 		this.gender = user.getGender();
 		this.address = new AddressDTO(user.getAddress());
 		this.vault = new VaultDTO(user.getVault());
+		
+		this.roles.clear();
 		user.getRoles().forEach(role -> this.roles.add(new RoleDTO(role)));
 	}
 

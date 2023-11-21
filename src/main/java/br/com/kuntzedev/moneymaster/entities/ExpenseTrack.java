@@ -121,6 +121,12 @@ public class ExpenseTrack implements Serializable {
 
 		return date.getDayOfMonth();
 	}
+	
+	public void addToTotalExpenseByMonth(TotalExpenseByMonth tebm) {
+		if(!this.totalExpenseByMonths.contains(tebm)) {
+			totalExpenseByMonths.add(tebm);
+		}
+	}
 
 	private float calculateFluctuation() {
 		float percentage = 0.0f;

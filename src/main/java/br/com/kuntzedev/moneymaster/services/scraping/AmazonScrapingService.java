@@ -14,10 +14,10 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
-import br.com.kuntzedev.moneymaster.dtos.AmazonItemDTO;
+import br.com.kuntzedev.moneymaster.dtos.ScrapingItemDTO;
 import br.com.kuntzedev.moneymaster.services.builders.LinkBuilder;
-import br.com.kuntzedev.moneymaster.services.scraping.exceptions.AmazonConnectionException;
 import br.com.kuntzedev.moneymaster.services.scraping.exceptions.InvalidLinkException;
+import br.com.kuntzedev.moneymaster.services.scraping.exceptions.ScrapingConnectionException;
 
 @Service
 public class AmazonScrapingService {
@@ -48,18 +48,17 @@ public class AmazonScrapingService {
 	private static final String IMG_TAG = "img[class=s-image]";
 	private static final String TITLE_TAG = "span[class=a-size-base-plus a-color-base a-text-normal]";
 	
-	public Page<AmazonItemDTO> searchForProduct(String product, int page, int size, String sort, boolean prime, boolean freeShiping) {
+	public Page<ScrapingItemDTO> searchForProduct(String product, int page, int size, String sort, boolean prime, boolean freeShiping) {
 		Document document = null;
 		
 		try {
 			document = Jsoup.connect(formatLinkToSearch(product, prime, freeShiping)).get();
-			System.out.println(formatLinkToSearch(product, prime, freeShiping));
 			
 			Elements products = getProducts(document);
-			List<AmazonItemDTO> items = new ArrayList<>();
+			List<ScrapingItemDTO> items = new ArrayList<>();
 			
 			for(int i = 0; i < products.size(); i++) {
-				AmazonItemDTO item = new AmazonItemDTO();
+				ScrapingItemDTO item = new ScrapingItemDTO();
 				
 				item.setName(getProductTitle(document, i));
 				item.setPrice(getProductPrice(document, i));
@@ -69,14 +68,14 @@ public class AmazonScrapingService {
 			}
 			
 			PageRequest pageRequest = PageRequest.of(page, size, Sort.by(Sort.Order.by(sort)));
-			return new PageImpl<AmazonItemDTO>(items, pageRequest, items.size());
+			return new PageImpl<ScrapingItemDTO>(items, pageRequest, items.size());
 		} catch (HttpStatusException e) {
 			String message = e.getMessage();
 			String status = e.getMessage().substring(message.indexOf("=") + 1, message.indexOf(","));
 			
-			throw new AmazonConnectionException("Something went wrong while trying to search for " + product, e, Integer.valueOf(status));
+			throw new ScrapingConnectionException("Something went wrong while trying to search for " + product, e, Integer.valueOf(status));
 		} catch (IOException e) {
-			throw new AmazonConnectionException(e.getMessage());
+			throw new ScrapingConnectionException(e.getMessage());
 		}
 	}
 

@@ -14,6 +14,8 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 @Entity
 @Table(name = "tb_item_price")
 public class ItemPrice implements Serializable {
@@ -62,6 +64,15 @@ public class ItemPrice implements Serializable {
 		this.price = price;
 	}
 	
+	@JsonIgnore
+	public ItemHistory getItemHistory() {
+		return itemHistory;
+	}
+
+	public void setItemHistory(ItemHistory itemHistory) {
+		this.itemHistory = itemHistory;
+	}
+
 	@Override
 	public int hashCode() {
 		return Objects.hash(id);

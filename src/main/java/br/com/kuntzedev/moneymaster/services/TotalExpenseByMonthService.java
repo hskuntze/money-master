@@ -48,7 +48,8 @@ public class TotalExpenseByMonthService {
 	
 	@Transactional
 	public Page<FixedExpenseDTO> findAllFixedExpenses(Pageable pageable) {
-		Page<FixedExpense> page = fixedExpensesRepository.findAll(pageable);
+		Long userId = authenticationService.authenticated().getId();
+		Page<FixedExpense> page = fixedExpensesRepository.findAllByUserId(userId, pageable);
 		return page.map(FixedExpenseDTO::new);
 	}
 	
@@ -78,6 +79,11 @@ public class TotalExpenseByMonthService {
 		}
 	}
 	
+	/**
+	 * Insere um gasto variável no "TotalExpenseByMonth"
+	 * @param month
+	 * @param dto
+	 */
 	@Transactional
 	public void insertVariableExpense(int month, VariableExpenseDTO dto) {
 		Long id = authenticationService.authenticated().getId();
@@ -92,6 +98,10 @@ public class TotalExpenseByMonthService {
 		tebmRepository.save(tebm);
 	}
 	
+	/**
+	 * Cria um gasto fixo e relaciona ele com o "TotalExpenseByMonth" atual.
+	 * @param dtos
+	 */
 	@Transactional
 	public void insertFixedExpense(FixedExpenseDTO... dtos) {
 		int month = LocalDate.now().getMonthValue();
@@ -138,6 +148,57 @@ public class TotalExpenseByMonthService {
 		return fresh;
 	}
 	
+	/**
+	 * Cria um "TotalExpenseByMonth" para o mês atual. O método avalia a data final dos "FixedExpense's"
+	 * do mês anterior. Se determinado "FixedExpense" tem uma data final maior que a data atual então ele
+	 * ainda é válido e é incluído no "TotalExpenseByMonth" criado.
+	 * @param et
+	 * @return
+	 */
+	@Transactional
+	public TotalExpenseByMonth newExpenseForActualMonth(ExpenseTrack et) {
+		boolean exists = verifyIfTotalExpenseByMonthExistsThisMonth();
+		
+		if(!exists) {
+			int thisMonth = LocalDate.now().getMonthValue();
+			LocalDate today = LocalDate.now();
+			
+			Long userId = authenticationService.authenticated().getId();
+			TotalExpenseByMonth lastMonth = tebmRepository.findByMonth(userId, thisMonth - 1).orElseThrow(() -> new ResourceNotFoundException(RNFE));
+			
+			BigDecimal totalExpendedByFixedExpenses = BigDecimal.ZERO;
+			
+			TotalExpenseByMonth forThisMonth = new TotalExpenseByMonth();
+			
+			forThisMonth.setDate(today);
+			forThisMonth.setRemainingAmount(BigDecimal.ZERO);
+			forThisMonth.setExpenseTrack(et);
+			
+			for(FixedExpense fe : lastMonth.getFixedExpenses()) {
+				if(fe.getBeginOfExpense().isBefore(today) && fe.getEndOfExpense().isAfter(today)) {
+					forThisMonth.getFixedExpenses().add(fe);
+					totalExpendedByFixedExpenses = totalExpendedByFixedExpenses.add(fe.getPrice());
+				}
+			}
+			
+			forThisMonth.setTotalExpended(totalExpendedByFixedExpenses);
+			
+			tebmRepository.save(forThisMonth);
+			
+			return forThisMonth;
+		} else {
+			throw new ResourceAlreadyExistsException("You can't create a monthly expense control for this specific month because one already exists!"); 
+		}
+	}
+	
+	/**
+	 * Cria um "TotalExpenseByMonth" para uma data específica.
+	 * @param et
+	 * @param date
+	 * @return
+	 * 
+	 * TODO: alguma solução que busque os gastos fixos e também insira-os neste TEBM
+	 */
 	@Transactional
 	public TotalExpenseByMonth newExpenseBySpecificMonth(ExpenseTrack et, LocalDate date) {
 		boolean exists = verifyIfTotalExpenseByMonthExistsInSpecificMonth(date.getMonthValue());
@@ -168,5 +229,7 @@ public class TotalExpenseByMonthService {
 		entity.setPrice(dto.getPrice());
 		entity.setDayOfCharge(dto.getDayOfCharge());
 		entity.setTitle(dto.getTitle());
+		entity.setBeginOfExpense(dto.getBeginOfExpense());
+		entity.setEndOfExpense(dto.getEndOfExpense());
 	}
 }

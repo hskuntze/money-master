@@ -76,8 +76,10 @@ public class ItemHistory implements Serializable {
 			BigDecimal previous = itemPrices.get(size - 2).getPrice();
 			BigDecimal current = itemPrices.get(size - 1).getPrice();
 			
-			BigDecimal difference = current.subtract(previous);
-			percentage = difference.divide(previous, 2, RoundingMode.HALF_UP).multiply(BigDecimal.valueOf(100)).floatValue();
+			if(!previous.equals(BigDecimal.valueOf(0)) || !current.equals(BigDecimal.valueOf(0))) {
+				BigDecimal difference = current.subtract(previous);
+				percentage = difference.divide(previous, 2, RoundingMode.HALF_EVEN).multiply(BigDecimal.valueOf(100)).floatValue();
+			}
 		}
 		
 		return percentage;

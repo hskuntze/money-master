@@ -1,27 +1,27 @@
 package br.com.kuntzedev.moneymaster.services.scraping.exceptions;
 
-public class AmazonConnectionException extends RuntimeException {
+public class ScrapingConnectionException extends RuntimeException {
 	private static final long serialVersionUID = 4467148790221083499L;
 	
 	private Integer status;
 
-	public AmazonConnectionException() {
+	public ScrapingConnectionException() {
 	}
 	
-	public AmazonConnectionException(String msg) {
+	public ScrapingConnectionException(String msg) {
 		super(msg);
 	}
 	
-	public AmazonConnectionException(String msg, Integer status) {
+	public ScrapingConnectionException(String msg, Integer status) {
 		super(msg);
 		this.status = status;
 	}
 	
-	public AmazonConnectionException(String msg, Throwable cause) {
+	public ScrapingConnectionException(String msg, Throwable cause) {
 		super(msg, cause);
 	}
 	
-	public AmazonConnectionException(String msg, Throwable cause, Integer status) {
+	public ScrapingConnectionException(String msg, Throwable cause, Integer status) {
 		super(msg, cause);
 		this.status = status;
 	}

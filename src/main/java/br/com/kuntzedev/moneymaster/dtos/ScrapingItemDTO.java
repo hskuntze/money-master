@@ -3,15 +3,22 @@ package br.com.kuntzedev.moneymaster.dtos;
 import java.io.Serializable;
 import java.math.BigDecimal;
 
-public class AmazonItemDTO implements Serializable {
+public class ScrapingItemDTO implements Serializable {
 	private static final long serialVersionUID = 3862791569776635445L;
 	
 	private BigDecimal price;
 	private String name;
 	private String link;
 	private String image;
-	
-	public AmazonItemDTO() {
+
+	public ScrapingItemDTO() {
+	}
+
+	public ScrapingItemDTO(BigDecimal price, String name, String link, String image) {
+		this.price = price;
+		this.name = name;
+		this.link = link;
+		this.image = image;
 	}
 
 	public BigDecimal getPrice() {
@@ -49,6 +56,6 @@ public class AmazonItemDTO implements Serializable {
 
 	@Override
 	public String toString() {
-		return "AmazonItemDTO [price=" + price + ", name=" + name + ", link=" + link + ", image=" + image + "]";
+		return "ScrapingItemDTO [price=" + price + ", name=" + name + ", link=" + link + ", image=" + image + "]";
 	}
 }
