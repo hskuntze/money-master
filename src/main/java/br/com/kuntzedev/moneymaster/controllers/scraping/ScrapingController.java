@@ -17,6 +17,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import br.com.kuntzedev.moneymaster.dtos.ItemDTO;
 import br.com.kuntzedev.moneymaster.dtos.ScrapingItemDTO;
 import br.com.kuntzedev.moneymaster.services.ItemService;
+import br.com.kuntzedev.moneymaster.services.scraping.AliExpressScrapingService;
 import br.com.kuntzedev.moneymaster.services.scraping.AmazonScrapingService;
 import br.com.kuntzedev.moneymaster.services.scraping.MercadoLivreScrapingService;
 import br.com.kuntzedev.moneymaster.services.scraping.SheinScrapingService;
@@ -35,6 +36,9 @@ public class ScrapingController {
 	private MercadoLivreScrapingService mercadoLivreScrapingService;
 	
 	@Autowired
+	private AliExpressScrapingService aliExpressScrapingService;
+	
+	@Autowired
 	private ItemService itemService;
 	
 	/**
@@ -45,7 +49,7 @@ public class ScrapingController {
 	public ResponseEntity<Page<ScrapingItemDTO>> searchForAmazonProduct(@RequestParam("product") String product,
 			@RequestParam(name = "page", defaultValue = "0") int page,
 			@RequestParam(value = "size", defaultValue = "10") int size,
-			@RequestParam(value = "sort", defaultValue = "title") String sort,
+			@RequestParam(value = "sort", defaultValue = "name") String sort,
 			@RequestParam(value = "prime", defaultValue = "false") boolean prime,
 			@RequestParam(value = "freeShiping", defaultValue = "false") boolean freeShiping){
 		return ResponseEntity.ok().body(amazonScrapingService.searchForProduct(product, page, size, sort, prime, freeShiping));
@@ -73,6 +77,18 @@ public class ScrapingController {
 			@RequestParam(value = "size", defaultValue = "10") int size,
 			@RequestParam(value = "sort", defaultValue = "name") String sort){
 		return ResponseEntity.ok().body(mercadoLivreScrapingService.searchForProduct(product, page, size, sort));
+	}
+	
+	/**
+	 * 				A L I   E X P R E S S
+	 */
+	
+	@GetMapping(value = "/aliexpress/search")
+	public ResponseEntity<Page<ScrapingItemDTO>> searchForAliExpressProduct(@RequestParam("product") String product,
+			@RequestParam(name = "page", defaultValue = "0") int page,
+			@RequestParam(value = "size", defaultValue = "10") int size,
+			@RequestParam(value = "sort", defaultValue = "name") String sort){
+		return ResponseEntity.ok().body(aliExpressScrapingService.searchForProduct(product, page, size, sort));
 	}
 	
 	/**

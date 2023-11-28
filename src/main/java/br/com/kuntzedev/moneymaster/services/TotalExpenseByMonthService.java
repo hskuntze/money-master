@@ -2,6 +2,7 @@ package br.com.kuntzedev.moneymaster.services;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,6 +54,10 @@ public class TotalExpenseByMonthService {
 		return page.map(FixedExpenseDTO::new);
 	}
 	
+	/**
+	 * Verifica se um TotalExpenseByMonth existe no mês atual
+	 * @return
+	 */
 	@Transactional(readOnly = true)
 	public boolean verifyIfTotalExpenseByMonthExistsThisMonth() {
 		int month = LocalDate.now().getMonthValue();
@@ -67,6 +72,11 @@ public class TotalExpenseByMonthService {
 		}
 	}
 	
+	/**
+	 * Verifica se um TotalExpenseByMonth existe para determinado mês
+	 * @param month
+	 * @return
+	 */
 	@Transactional(readOnly = true)
 	public boolean verifyIfTotalExpenseByMonthExistsInSpecificMonth(int month) {
 		Long id = authenticationService.authenticated().getId();
@@ -77,6 +87,26 @@ public class TotalExpenseByMonthService {
 		} else {
 			return true;
 		}
+	}
+	
+	/**
+	 * Esta função diz respeito a criação de um novo "TotalExpenseByMonth" completamente zerado.
+	 * Se aplica ao momento da criação de um "ExpenseTrack".
+	 * @param et
+	 * @return
+	 */
+	@Transactional
+	public TotalExpenseByMonth newExpenseByMonth(ExpenseTrack et) {
+		TotalExpenseByMonth fresh = new TotalExpenseByMonth();
+		
+		fresh.setDate(LocalDate.now());
+		fresh.setRemainingAmount(BigDecimal.ZERO);
+		fresh.setTotalExpended(BigDecimal.ZERO);
+		fresh.setExpenseTrack(et);
+		
+		tebmRepository.save(fresh);
+		
+		return fresh;
 	}
 	
 	/**
@@ -99,7 +129,59 @@ public class TotalExpenseByMonthService {
 	}
 	
 	/**
-	 * Cria um gasto fixo e relaciona ele com o "TotalExpenseByMonth" atual.
+	 * Insere vários gastos variáveis no "TotalExpenseByMonth"
+	 * @param month
+	 * @param dto
+	 */
+	@Transactional
+	public void insertVariableExpense(int month, VariableExpenseDTO... dtos) {
+		Long id = authenticationService.authenticated().getId();
+		TotalExpenseByMonth tebm = tebmRepository.findByMonth(id, month).orElseThrow(() -> new ResourceNotFoundException(RNFE));
+		
+		for(VariableExpenseDTO v : dtos) {
+			VariableExpense ve = new VariableExpense();
+			variableExpensesDtoToEntity(ve, v);
+			ve.setTotalExpenseByMonth(tebm);
+			ve = variableExpensesRepository.save(ve);
+			
+			tebm.getVariableExpenses().add(ve);
+		}
+		
+		tebmRepository.save(tebm);
+	}
+	
+	/**
+	 * Cria um gasto fixo e o relaciona com o "TotalExpenseByMonth" atual.
+	 * @param dtos
+	 */
+	@Transactional
+	public void insertFixedExpense(FixedExpenseDTO dto) {
+		int month = LocalDate.now().getMonthValue();
+		Long id = authenticationService.authenticated().getId();
+		
+		TotalExpenseByMonth tebm = tebmRepository.findByMonth(id, month).orElseThrow(() -> new ResourceNotFoundException(RNFE));
+		Optional<List<FixedExpense>> opt = fixedExpensesRepository.findManyByTitle(dto.getTitle());
+		
+		if(!opt.get().isEmpty()) {
+			for(FixedExpense fe : opt.get()) {
+				boolean contains = tebm.getFixedExpenses().contains(fe);
+				if(!contains) {
+					tebm.getFixedExpenses().add(fe);
+				}
+			}
+		} else {
+			FixedExpense fe = new FixedExpense();
+			fixedExpensesDtoToEntity(fe, dto);
+			fe = fixedExpensesRepository.save(fe);
+			
+			tebm.getFixedExpenses().add(fe);
+		}
+		
+		tebmRepository.save(tebm);
+	}
+	
+	/**
+	 * Cria uma série de gastos fixos e os relaciona com o "TotalExpenseByMonth" atual.
 	 * @param dtos
 	 */
 	@Transactional
@@ -109,12 +191,14 @@ public class TotalExpenseByMonthService {
 		
 		TotalExpenseByMonth tebm = tebmRepository.findByMonth(id, month).orElseThrow(() -> new ResourceNotFoundException(RNFE));
 		for(FixedExpenseDTO dto : dtos) {
-			Optional<FixedExpense> opt = fixedExpensesRepository.findByTitle(dto.getTitle());
+			Optional<List<FixedExpense>> opt = fixedExpensesRepository.findManyByTitle(dto.getTitle());
 			
-			if(opt.isPresent()) {
-				boolean contains = tebm.getFixedExpenses().contains(opt.get());
-				if(!contains) {
-					tebm.getFixedExpenses().add(opt.get());
+			if(!opt.get().isEmpty()) {
+				for(FixedExpense fe : opt.get()) {
+					boolean contains = tebm.getFixedExpenses().contains(fe);
+					if(!contains) {
+						tebm.getFixedExpenses().add(fe);
+					}
 				}
 			} else {
 				FixedExpense fe = new FixedExpense();
@@ -129,23 +213,27 @@ public class TotalExpenseByMonthService {
 	}
 	
 	/**
-	 * Esta função diz respeito a criação de um novo "TotalExpenseByMonth" completamente zerado.
-	 * Se aplica ao momento da criação de um "ExpenseTrack".
-	 * @param et
-	 * @return
+	 * Operação responsável por atualizar um objeto "VariableExpense"
+	 * @param id
+	 * @param dto
 	 */
 	@Transactional
-	public TotalExpenseByMonth newExpenseByMonth(ExpenseTrack et) {
-		TotalExpenseByMonth fresh = new TotalExpenseByMonth();
-		
-		fresh.setDate(LocalDate.now());
-		fresh.setRemainingAmount(BigDecimal.ZERO);
-		fresh.setTotalExpended(BigDecimal.ZERO);
-		fresh.setExpenseTrack(et);
-		
-		tebmRepository.save(fresh);
-		
-		return fresh;
+	public void updateVariableExpense(Long id, VariableExpenseDTO dto) {
+		VariableExpense ve = variableExpensesRepository.findById(id).orElseThrow(() ->  new ResourceNotFoundException(RNFE));
+		variableExpensesDtoToEntity(ve, dto);
+		ve = variableExpensesRepository.save(ve);
+	}
+	
+	/**
+	 * Operação responsável por atualizar um objeto "FixedExpense"
+	 * @param id
+	 * @param dto
+	 */
+	@Transactional
+	public void updateFixedExpense(Long id, FixedExpenseDTO dto) {
+		FixedExpense fe = fixedExpensesRepository.findById(id).orElseThrow(() ->  new ResourceNotFoundException(RNFE));
+		fixedExpensesDtoToEntity(fe, dto);
+		fe = fixedExpensesRepository.save(fe);
 	}
 	
 	/**
@@ -216,6 +304,36 @@ public class TotalExpenseByMonthService {
 			return tebm;
 		} else {
 			throw new ResourceAlreadyExistsException("You can't create a monthly expense control for this specific month because one already exists!");
+		}
+	}
+	
+	/**
+	 * Delete um FixedExpense baseado no identificador
+	 * @param id
+	 */
+	@Transactional
+	public void deleteFixedExpense(Long id) {
+		Optional<FixedExpense> opt = fixedExpensesRepository.findById(id);
+		
+		if(opt.isPresent()) {
+			fixedExpensesRepository.deleteFixedExpenseInAuxTable(id);
+			fixedExpensesRepository.deleteById(id);
+		} else {
+			throw new ResourceNotFoundException(RNFE);
+		}
+	}
+
+	/**
+	 * Delete um VariableExpense baseado no identificador
+	 * @param id
+	 */
+	public void deleteVariableExpense(Long id) {
+		Optional<VariableExpense> opt = variableExpensesRepository.findById(id);
+		
+		if(opt.isPresent()) {
+			variableExpensesRepository.deleteById(id);
+		} else {
+			throw new ResourceNotFoundException(RNFE);
 		}
 	}
 	

@@ -3,6 +3,10 @@ package br.com.kuntzedev.moneymaster.dtos;
 import java.io.Serializable;
 import java.math.BigDecimal;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
+import br.com.kuntzedev.moneymaster.enums.SourcePlatform;
+
 public class ScrapingItemDTO implements Serializable {
 	private static final long serialVersionUID = 3862791569776635445L;
 	
@@ -10,6 +14,7 @@ public class ScrapingItemDTO implements Serializable {
 	private String name;
 	private String link;
 	private String image;
+	private SourcePlatform sourcePlatform;
 
 	public ScrapingItemDTO() {
 	}
@@ -52,6 +57,19 @@ public class ScrapingItemDTO implements Serializable {
 
 	public void setImage(String image) {
 		this.image = image;
+	}
+
+	public String getSourcePlatformName() {
+		return sourcePlatform.getDesc();
+	}
+	
+	@JsonIgnore
+	public SourcePlatform getSourcePlatform() {
+		return sourcePlatform;
+	}
+
+	public void setSourcePlatform(SourcePlatform sourcePlatform) {
+		this.sourcePlatform = sourcePlatform;
 	}
 
 	@Override

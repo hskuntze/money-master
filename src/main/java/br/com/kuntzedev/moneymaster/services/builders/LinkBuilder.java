@@ -11,11 +11,13 @@ public class LinkBuilder {
 	private String mkPtBrParam;
 	private String primeParam;
 	private String freeShipingParam;
+	private String crid;
 	
-	public LinkBuilder(String urlParam, String searchParam, String searchValue) {
+	public LinkBuilder(String urlParam, String searchParam, String searchValue, String crid) {
 		this.urlParam = urlParam;
 		this.searchParam = searchParam;
 		this.searchValue = searchValue;
+		this.crid = crid;
 	}
 	
 	public LinkBuilder setPrefixParam(String prefix) {
@@ -49,14 +51,14 @@ public class LinkBuilder {
 	}
 	
 	public String get() {
-		return (urlParam + searchParam + searchValue + mkPtBrParam + prefixParam + prefixValue + prefixParam + prefixValue + refParam).replace(" ", "");
+		return (urlParam + searchParam + searchValue + mkPtBrParam + prefixParam + crid + prefixValue + prefixParam + prefixValue + refParam).replace(" ", "");
 	}
 	
 	public String getWithPrime() {
-		return (urlParam + searchParam + searchValue + primeParam + mkPtBrParam + prefixParam + prefixValue + prefixParam + prefixValue + refParam).replace(" ", "");
+		return (urlParam + searchParam + searchValue + primeParam + mkPtBrParam + crid + prefixParam + prefixValue + prefixParam + prefixValue + refParam).replace(" ", "");
 	}
 	
 	public String getWithFreeShiping() {
-		return (urlParam + searchParam + searchValue + freeShipingParam + mkPtBrParam + prefixParam + prefixValue + prefixParam + prefixValue + refParam).replace(" ", "");
+		return (urlParam + searchParam + searchValue + freeShipingParam + mkPtBrParam + crid + prefixParam + prefixValue + prefixParam + prefixValue + refParam).replace(" ", "");
 	}
 }

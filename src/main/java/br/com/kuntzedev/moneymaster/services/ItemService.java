@@ -83,8 +83,9 @@ public class ItemService {
 			entity.setImage(dto.getImage());
 			entity.setLink(dto.getLink());
 			entity.setPrice(dto.getPrice());
+			entity.setSourcePlatform(dto.getSourcePlatform());
 			entity.setVariation(0.0f);
-			entity.setWishlist(wishlistRepository.getReferenceById(wishlistId));
+			entity.setWishlist(wishlistRepository.findById(wishlistId).orElseThrow(() -> new ResourceNotFoundException("Wishlist: " + RNFE)));
 			entity = itemRepository.save(entity);
 			
 			ItemHistory history = initializeHistory(entity);
@@ -158,6 +159,7 @@ public class ItemService {
 		entity.setImage(dto.getImage());
 		entity.setLink(dto.getLink());
 		entity.setName(dto.getName());
+		entity.setSourcePlatform(dto.getSourcePlatform());
 	}
 	
 	private ItemHistory initializeHistory(Item entity) {
