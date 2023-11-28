@@ -1,6 +1,8 @@
 package br.com.kuntzedev.moneymaster.services.scraping;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -15,6 +17,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import br.com.kuntzedev.moneymaster.dtos.ScrapingItemDTO;
+import br.com.kuntzedev.moneymaster.enums.SourcePlatform;
 import br.com.kuntzedev.moneymaster.services.builders.LinkBuilder;
 import br.com.kuntzedev.moneymaster.services.scraping.exceptions.InvalidLinkException;
 import br.com.kuntzedev.moneymaster.services.scraping.exceptions.ScrapingConnectionException;
@@ -32,6 +35,7 @@ public class AmazonScrapingService {
 	private static final String PREFIX_PARAMETER = "&sprefix=";
 	private static final String PRIME_PARAMETER = "&rh=p_85%3A19171728011";
 	private static final String FREE_SHIPING_PARAMETER = "&rh=p_n_free_shipping_eligible%3A19171733011";
+	private static final String CRID_PARAMETER = "&crid=0";
 	
 	/**
 	 * Parâmetros de: preços
@@ -48,11 +52,18 @@ public class AmazonScrapingService {
 	private static final String IMG_TAG = "img[class=s-image]";
 	private static final String TITLE_TAG = "span[class=a-size-base-plus a-color-base a-text-normal]";
 	
+	private static final String USER_AGENT = "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:109.0) Gecko/20100101 Firefox/119.0";
+	
 	public Page<ScrapingItemDTO> searchForProduct(String product, int page, int size, String sort, boolean prime, boolean freeShiping) {
 		Document document = null;
 		
 		try {
-			document = Jsoup.connect(formatLinkToSearch(product, prime, freeShiping)).get();
+			document = Jsoup.connect(formatLinkToSearch(product, prime, freeShiping))
+					.cookie("i18n-prefs", "BRL")
+					.cookie("lc-acbbr", "pt_BR")
+					.cookie("session-id", "145-9560743-4533017")
+					.userAgent(USER_AGENT)
+					.get();
 			
 			Elements products = getProducts(document);
 			List<ScrapingItemDTO> items = new ArrayList<>();
@@ -64,6 +75,8 @@ public class AmazonScrapingService {
 				item.setPrice(getProductPrice(document, i));
 				item.setImage(getImageLink(document, i));
 				item.setLink(getProductLink(document, i));
+				item.setSourcePlatform(SourcePlatform.AMAZON);
+				
 				items.add(item);
 			}
 			
@@ -111,7 +124,12 @@ public class AmazonScrapingService {
 	}
 	
 	private String formatLinkToSearch(String product, boolean prime, boolean freeShiping) {
-		String formattedProduct = product.replace(" ", "+").replace("-", "+");
+		String formattedProduct = "";
+		try {
+			formattedProduct = URLEncoder.encode(product, "UTF-8").replace("+", "%20");
+		} catch (UnsupportedEncodingException e) {
+			throw new InvalidLinkException("Couldn't parse to the encoded format", e);
+		}
 		
 		String formattedPrefix = "";
 		int firstSpace = product.indexOf(" ");
@@ -126,11 +144,11 @@ public class AmazonScrapingService {
 		}
 		
 		if(!prime && !freeShiping) {
-			return new LinkBuilder(BASE_URL, SEARCH_PARAMETER, formattedProduct).setMkPtBrParam(MK_PT_BR_PARAMETER).setPrefixParam(PREFIX_PARAMETER).setPrefixValue(formattedPrefix).setRefParam(REF_PARAMETER).get();
+			return new LinkBuilder(BASE_URL, SEARCH_PARAMETER, formattedProduct, CRID_PARAMETER).setMkPtBrParam(MK_PT_BR_PARAMETER).setPrefixParam(PREFIX_PARAMETER).setPrefixValue(formattedPrefix).setRefParam(REF_PARAMETER).get();
 		} else if(prime && !freeShiping) {
-			return new LinkBuilder(BASE_URL, SEARCH_PARAMETER, formattedProduct).setMkPtBrParam(MK_PT_BR_PARAMETER).setPrefixParam(PREFIX_PARAMETER).setPrefixValue(formattedPrefix).setRefParam(REF_PARAMETER).setPrimeParam(PRIME_PARAMETER).getWithPrime();
+			return new LinkBuilder(BASE_URL, SEARCH_PARAMETER, formattedProduct, CRID_PARAMETER).setMkPtBrParam(MK_PT_BR_PARAMETER).setPrefixParam(PREFIX_PARAMETER).setPrefixValue(formattedPrefix).setRefParam(REF_PARAMETER).setPrimeParam(PRIME_PARAMETER).getWithPrime();
 		} else if(freeShiping && !prime){
-			return new LinkBuilder(BASE_URL, SEARCH_PARAMETER, formattedProduct).setMkPtBrParam(MK_PT_BR_PARAMETER).setPrefixParam(PREFIX_PARAMETER).setPrefixValue(formattedPrefix).setRefParam(REF_PARAMETER).setFreeShipingParam(FREE_SHIPING_PARAMETER).getWithFreeShiping();
+			return new LinkBuilder(BASE_URL, SEARCH_PARAMETER, formattedProduct, CRID_PARAMETER).setMkPtBrParam(MK_PT_BR_PARAMETER).setPrefixParam(PREFIX_PARAMETER).setPrefixValue(formattedPrefix).setRefParam(REF_PARAMETER).setFreeShipingParam(FREE_SHIPING_PARAMETER).getWithFreeShiping();
 		} else {
 			throw new InvalidLinkException("Either select prime or free shiping.");
 		}

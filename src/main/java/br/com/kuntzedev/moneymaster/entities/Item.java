@@ -15,6 +15,10 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
+import br.com.kuntzedev.moneymaster.enums.SourcePlatform;
+
 @Entity
 @Table(name = "tb_item")
 public class Item implements Serializable {
@@ -30,6 +34,7 @@ public class Item implements Serializable {
 	@Column(columnDefinition = "TEXT")
 	private String image;
 	private Float variation;
+	private SourcePlatform sourcePlatform;
 	
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "wishlist_id")
@@ -105,6 +110,19 @@ public class Item implements Serializable {
 		this.itemHistory = itemHistory;
 	}
 
+	public String getSourcePlatformName() {
+		return sourcePlatform.getDesc();
+	}
+
+	@JsonIgnore
+	public SourcePlatform getSourcePlatform() {
+		return sourcePlatform;
+	}
+
+	public void setSourcePlatform(SourcePlatform sourcePlatform) {
+		this.sourcePlatform = sourcePlatform;
+	}
+
 	@Override
 	public int hashCode() {
 		return Objects.hash(id);
@@ -125,6 +143,6 @@ public class Item implements Serializable {
 	@Override
 	public String toString() {
 		return "Item [id=" + id + ", name=" + name + ", price=" + price + ", link=" + link + ", image=" + image
-				+ ", variation=" + variation + "]";
+				+ ", variation=" + variation + ", sourcePlatform=" + sourcePlatform + "]";
 	}
 }

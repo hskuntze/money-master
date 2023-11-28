@@ -17,6 +17,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import br.com.kuntzedev.moneymaster.dtos.ScrapingItemDTO;
+import br.com.kuntzedev.moneymaster.enums.SourcePlatform;
 import br.com.kuntzedev.moneymaster.services.scraping.exceptions.InvalidLinkException;
 import br.com.kuntzedev.moneymaster.services.scraping.exceptions.ScrapingConnectionException;
 
@@ -44,7 +45,6 @@ public class MercadoLivreScrapingService {
 		Document document = null;
 		
 		try {
-			System.out.println(formatLinkToSearch(product));
 			document = Jsoup.connect(formatLinkToSearch(product)).get();
 			
 			Elements products = getProducts(document);
@@ -57,6 +57,7 @@ public class MercadoLivreScrapingService {
 				item.setImage(getProductImage(document, i));
 				item.setLink(getProductLink(document, i));
 				item.setPrice(getProductPrice(document, i));
+				item.setSourcePlatform(SourcePlatform.MERCADO_LIVRE);
 				
 				items.add(item);
 			}

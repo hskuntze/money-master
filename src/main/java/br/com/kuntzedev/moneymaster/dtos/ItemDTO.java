@@ -5,6 +5,7 @@ import java.math.BigDecimal;
 
 import br.com.kuntzedev.moneymaster.entities.Item;
 import br.com.kuntzedev.moneymaster.entities.ItemHistory;
+import br.com.kuntzedev.moneymaster.enums.SourcePlatform;
 
 public class ItemDTO implements Serializable {
 	private static final long serialVersionUID = 8096854116134620745L;
@@ -15,6 +16,7 @@ public class ItemDTO implements Serializable {
 	private String link;
 	private String image;
 	private Float variation;
+	private SourcePlatform sourcePlatform;
 	
 	private ItemHistory itemHistory;
 	
@@ -28,6 +30,7 @@ public class ItemDTO implements Serializable {
 		this.link = item.getLink();
 		this.image = item.getImage();
 		this.variation = item.getVariation();
+		this.sourcePlatform = item.getSourcePlatform();
 		
 		this.itemHistory = item.getItemHistory();
 	}
@@ -86,6 +89,18 @@ public class ItemDTO implements Serializable {
 
 	public void setItemHistory(ItemHistory itemHistory) {
 		this.itemHistory = itemHistory;
+	}
+	
+	public String getSourcePlatformName() {
+		return sourcePlatform.getDesc();
+	}
+
+	public SourcePlatform getSourcePlatform() {
+		return sourcePlatform;
+	}
+
+	public void setSourcePlatform(SourcePlatform sourcePlatform) {
+		this.sourcePlatform = sourcePlatform;
 	}
 
 	@Override

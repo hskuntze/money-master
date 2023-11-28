@@ -17,6 +17,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import br.com.kuntzedev.moneymaster.dtos.ScrapingItemDTO;
+import br.com.kuntzedev.moneymaster.enums.SourcePlatform;
 import br.com.kuntzedev.moneymaster.services.scraping.exceptions.InvalidLinkException;
 import br.com.kuntzedev.moneymaster.services.scraping.exceptions.ScrapingConnectionException;
 
@@ -61,6 +62,7 @@ public class SheinScrapingService {
 				item.setImage(getProductImage(document, i).substring(2));
 				item.setLink(BASE_URL + getProductLink(document, i));
 				item.setPrice(getProductPrice(document, i));
+				item.setSourcePlatform(SourcePlatform.SHEIN);
 				
 				items.add(item);
 			}
