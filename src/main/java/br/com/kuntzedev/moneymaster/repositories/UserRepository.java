@@ -19,7 +19,7 @@ public interface UserRepository extends JpaRepository<User, Long>{
 	User findByRecoveryToken(String token);
 	
 	@Query("SELECT u FROM User u "
-			+ "LEFT JOIN FETCH u.wishlists "
+			+ "LEFT JOIN FETCH u.wishlists w "
 			+ "WHERE u.id = :id")
 	Optional<User> findUser(Long id);
 }
