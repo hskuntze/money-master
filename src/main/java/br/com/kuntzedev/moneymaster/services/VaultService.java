@@ -1,14 +1,21 @@
 package br.com.kuntzedev.moneymaster.services;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import br.com.kuntzedev.moneymaster.dtos.VaultDTO;
+import br.com.kuntzedev.moneymaster.dtos.VaultSavingsResponseDTO;
+import br.com.kuntzedev.moneymaster.entities.User;
 import br.com.kuntzedev.moneymaster.entities.Vault;
+import br.com.kuntzedev.moneymaster.entities.Wishlist;
+import br.com.kuntzedev.moneymaster.repositories.UserRepository;
 import br.com.kuntzedev.moneymaster.repositories.VaultRepository;
+import br.com.kuntzedev.moneymaster.repositories.WishlistRepository;
 import br.com.kuntzedev.moneymaster.services.exceptions.ResourceNotFoundException;
 import br.com.kuntzedev.moneymaster.services.exceptions.UnprocessableRequestException;
 
@@ -17,6 +24,15 @@ public class VaultService {
 
 	@Autowired
 	private VaultRepository vaultRepository;
+	
+	@Autowired
+	private UserRepository userRepository;
+	
+	@Autowired
+	private WishlistRepository wishlistRepository;
+	
+	@Autowired
+	private AuthenticationService authenticationService;
 	
 	private static final String RNFE = "Resource not found in the database.";
 	private static final String NULL_PARAM = "Null parameter.";
@@ -116,10 +132,11 @@ public class VaultService {
 	}
 	
 	@Transactional
-	public VaultDTO increaseWalletValue(Long id, BigDecimal value) {
-		if(id != null && value != null) {
+	public VaultDTO increaseWalletValue(BigDecimal value) {
+		if(value != null) {
 			if(value.signum() > 0) {
-				Vault vault = vaultRepository.getReferenceById(id);
+				Long vaultId = authenticationService.authenticated().getVault().getId();
+				Vault vault = vaultRepository.getReferenceById(vaultId);
 				vault.increaseWalletValue(value);
 				
 				vault = vaultRepository.save(vault);
@@ -133,14 +150,25 @@ public class VaultService {
 	}
 	
 	@Transactional
-	public VaultDTO increaseSavingsValue(Long id, BigDecimal value) {
-		if(id != null && value != null) {
+	public VaultSavingsResponseDTO increaseSavingsValue(BigDecimal value) {
+		if(value != null) {
 			if(value.signum() > 0) {
-				Vault vault = vaultRepository.getReferenceById(id);
+				StringBuilder sb = new StringBuilder();
+				
+				Long vaultId = authenticationService.authenticated().getVault().getId();
+				Vault vault = vaultRepository.getReferenceById(vaultId);
 				vault.increaseSavingsValue(value);
 				
+				List<Wishlist> wishlists = this.verifyWishlistPurchasePossibility();
+				if(wishlists.size() > 0) {
+					sb.append("Você pode adquirir uma ou mais listas de desejo:");
+					for(Wishlist w : wishlists) {
+						sb.append(" " + w.getTitle() + ";");
+					}
+				}
+				
 				vault = vaultRepository.save(vault);
-				return new VaultDTO(vault);
+				return new VaultSavingsResponseDTO(sb.toString(), vault);
 			} else {
 				throw new UnprocessableRequestException(NOT_ACCEPTABLE);
 			}
@@ -150,10 +178,11 @@ public class VaultService {
 	}
 	
 	@Transactional
-	public VaultDTO increaseAllowedToSpendValue(Long id, BigDecimal value) {
-		if(id != null && value != null) {
+	public VaultDTO increaseAllowedToSpendValue(BigDecimal value) {
+		if(value != null) {
 			if(value.signum() > 0) {
-				Vault vault = vaultRepository.getReferenceById(id);
+				Long vaultId = authenticationService.authenticated().getVault().getId();
+				Vault vault = vaultRepository.getReferenceById(vaultId);
 				vault.increaseAllowedToSpendValue(value);
 				
 				vault = vaultRepository.save(vault);
@@ -167,10 +196,11 @@ public class VaultService {
 	}
 	
 	@Transactional
-	public VaultDTO reduceWalletValue(Long id, BigDecimal value) {
-		if(id != null && value != null) {
+	public VaultDTO reduceWalletValue(BigDecimal value) {
+		if(value != null) {
 			if(value.signum() > 0) {
-				Vault vault = vaultRepository.getReferenceById(id);
+				Long vaultId = authenticationService.authenticated().getVault().getId();
+				Vault vault = vaultRepository.getReferenceById(vaultId);
 				vault.reduceWalletValue(value);
 				
 				vault = vaultRepository.save(vault);
@@ -184,10 +214,11 @@ public class VaultService {
 	}
 	
 	@Transactional
-	public VaultDTO reduceSavingsValue(Long id, BigDecimal value) {
-		if(id != null && value != null) {
+	public VaultDTO reduceSavingsValue(BigDecimal value) {
+		if(value != null) {
 			if(value.signum() > 0) {
-				Vault vault = vaultRepository.getReferenceById(id);
+				Long vaultId = authenticationService.authenticated().getVault().getId();
+				Vault vault = vaultRepository.getReferenceById(vaultId);
 				vault.reduceSavingsValue(value);
 				
 				vault = vaultRepository.save(vault);
@@ -201,10 +232,11 @@ public class VaultService {
 	}
 	
 	@Transactional
-	public VaultDTO reduceAllowedToSpendValue(Long id, BigDecimal value) {
-		if(id != null && value != null) {
+	public VaultDTO reduceAllowedToSpendValue(BigDecimal value) {
+		if(value != null) {
 			if(value.signum() > 0) {
-				Vault vault = vaultRepository.getReferenceById(id);
+				Long vaultId = authenticationService.authenticated().getVault().getId();
+				Vault vault = vaultRepository.getReferenceById(vaultId);
 				vault.reduceAllowedToSpendValue(value);
 				
 				vault = vaultRepository.save(vault);
@@ -215,6 +247,22 @@ public class VaultService {
 		} else {
 			throw new UnprocessableRequestException(NULL_PARAM);
 		}
+	}
+	
+	private List<Wishlist> verifyWishlistPurchasePossibility() {
+		Long userId = authenticationService.authenticated().getId();
+		User user = userRepository.findUser(userId).orElseThrow(() -> new ResourceNotFoundException("User not found"));
+		List<Wishlist> wishlists = new ArrayList<>();
+		
+		for(int i = 0; i < user.getWishlists().size(); i++) {
+			Wishlist wishlist = wishlistRepository.findWishlistWithItems(user.getWishlists().get(i).getId()).orElseThrow(() -> new ResourceNotFoundException("Wishlist not found"));
+			int compare = user.getVault().getSavings().compareTo(wishlist.getTotalValue());
+			if(compare >= 0) {
+				wishlists.add(wishlist);
+			}
+		}
+		
+		return wishlists;
 	}
 	
 	private void flush() {

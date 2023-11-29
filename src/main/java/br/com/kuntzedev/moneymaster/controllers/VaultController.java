@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import br.com.kuntzedev.moneymaster.dtos.VaultDTO;
+import br.com.kuntzedev.moneymaster.dtos.VaultSavingsResponseDTO;
 import br.com.kuntzedev.moneymaster.services.VaultService;
 
 @RestController
@@ -108,9 +109,9 @@ public class VaultController {
 	 * @param value
 	 * @return
 	 */
-	@PatchMapping(value = "/increaseSavings/{id}")
-	public ResponseEntity<VaultDTO> increaseSavings(@PathVariable Long id, @RequestParam("value") BigDecimal value) {
-		return ResponseEntity.ok().body(vaultService.increaseSavingsValue(id, value));
+	@PatchMapping(value = "/increaseSavings")
+	public ResponseEntity<VaultSavingsResponseDTO> increaseSavings(@RequestParam("value") BigDecimal value) {
+		return ResponseEntity.ok().body(vaultService.increaseSavingsValue(value));
 	}
 	
 	/**
@@ -119,9 +120,9 @@ public class VaultController {
 	 * @param value
 	 * @return
 	 */
-	@PatchMapping(value = "/reduceSavings/{id}")
-	public ResponseEntity<VaultDTO> reduceSavings(@PathVariable Long id, @RequestParam("value") BigDecimal value) {
-		return ResponseEntity.ok().body(vaultService.reduceSavingsValue(id, value));
+	@PatchMapping(value = "/reduceSavings")
+	public ResponseEntity<VaultDTO> reduceSavings(@RequestParam("value") BigDecimal value) {
+		return ResponseEntity.ok().body(vaultService.reduceSavingsValue(value));
 	}
 	
 	/**
@@ -130,9 +131,9 @@ public class VaultController {
 	 * @param value
 	 * @return
 	 */
-	@PatchMapping(value = "/increaseWallet/{id}")
-	public ResponseEntity<VaultDTO> increaseWallet(@PathVariable Long id, @RequestParam("value") BigDecimal value) {
-		return ResponseEntity.ok().body(vaultService.increaseWalletValue(id, value));
+	@PatchMapping(value = "/increaseWallet")
+	public ResponseEntity<VaultDTO> increaseWallet(@RequestParam("value") BigDecimal value) {
+		return ResponseEntity.ok().body(vaultService.increaseWalletValue(value));
 	}
 	
 	/**
@@ -141,9 +142,9 @@ public class VaultController {
 	 * @param value
 	 * @return
 	 */
-	@PatchMapping(value = "/reduceWallet/{id}")
-	public ResponseEntity<VaultDTO> reduceWallet(@PathVariable Long id, @RequestParam("value") BigDecimal value) {
-		return ResponseEntity.ok().body(vaultService.reduceWalletValue(id, value));
+	@PatchMapping(value = "/reduceWallet")
+	public ResponseEntity<VaultDTO> reduceWallet(@RequestParam("value") BigDecimal value) {
+		return ResponseEntity.ok().body(vaultService.reduceWalletValue(value));
 	}
 	
 	/**
@@ -152,9 +153,9 @@ public class VaultController {
 	 * @param value
 	 * @return
 	 */
-	@PatchMapping(value = "/increaseAllowedToSpend/{id}")
-	public ResponseEntity<VaultDTO> increaseAllowedToSpend(@PathVariable Long id, @RequestParam("value") BigDecimal value) {
-		return ResponseEntity.ok().body(vaultService.increaseAllowedToSpendValue(id, value));
+	@PatchMapping(value = "/increaseAllowedToSpend")
+	public ResponseEntity<VaultDTO> increaseAllowedToSpend(@RequestParam("value") BigDecimal value) {
+		return ResponseEntity.ok().body(vaultService.increaseAllowedToSpendValue(value));
 	}
 	
 	/**
@@ -163,8 +164,8 @@ public class VaultController {
 	 * @param value
 	 * @return
 	 */
-	@PatchMapping(value = "/reduceAllowedToSpend/{id}")
-	public ResponseEntity<VaultDTO> reduceAllowedToSpend(@PathVariable Long id, @RequestParam("value") BigDecimal value) {
-		return ResponseEntity.ok().body(vaultService.reduceAllowedToSpendValue(id, value));
+	@PatchMapping(value = "/reduceAllowedToSpend")
+	public ResponseEntity<VaultDTO> reduceAllowedToSpend(@RequestParam("value") BigDecimal value) {
+		return ResponseEntity.ok().body(vaultService.reduceAllowedToSpendValue(value));
 	}
 }

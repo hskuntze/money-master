@@ -90,10 +90,6 @@ public class ItemDTO implements Serializable {
 	public void setItemHistory(ItemHistory itemHistory) {
 		this.itemHistory = itemHistory;
 	}
-	
-	public String getSourcePlatformName() {
-		return sourcePlatform.getDesc();
-	}
 
 	public SourcePlatform getSourcePlatform() {
 		return sourcePlatform;
@@ -101,6 +97,10 @@ public class ItemDTO implements Serializable {
 
 	public void setSourcePlatform(SourcePlatform sourcePlatform) {
 		this.sourcePlatform = sourcePlatform;
+	}
+	
+	public String getSourcePlatformName() {
+		return sourcePlatform.getDesc();
 	}
 
 	@Override

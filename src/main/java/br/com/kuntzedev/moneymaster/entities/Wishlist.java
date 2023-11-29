@@ -81,8 +81,8 @@ public class Wishlist implements Serializable {
 	}
 
 	public BigDecimal getTotalValue() {
-		//return totalValue;
-		return calculateTotalValue();
+		totalValue = calculateTotalValue();
+		return totalValue;
 	}
 
 	public void setTotalValue(BigDecimal totalValue) {
@@ -182,7 +182,7 @@ public class Wishlist implements Serializable {
 
 	@Override
 	public String toString() {
-		return "Wishlist [id=" + id + ", title=" + title + ", totalValue=" + totalValue + ", installment=" + installment
+		return "Wishlist [id=" + id + ", title=" + title + ", totalValue=" + getTotalValue() + ", installment=" + installment
 				+ ", totalInstallments=" + totalInstallments + ", installmentsValue=" + installmentsValue + "]";
 	}
 }
