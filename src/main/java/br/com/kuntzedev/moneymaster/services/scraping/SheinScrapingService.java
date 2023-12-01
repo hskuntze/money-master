@@ -17,6 +17,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import br.com.kuntzedev.moneymaster.dtos.ScrapingItemDTO;
+import br.com.kuntzedev.moneymaster.entities.Item;
 import br.com.kuntzedev.moneymaster.enums.SourcePlatform;
 import br.com.kuntzedev.moneymaster.services.scraping.exceptions.InvalidLinkException;
 import br.com.kuntzedev.moneymaster.services.scraping.exceptions.ScrapingConnectionException;
@@ -46,6 +47,14 @@ public class SheinScrapingService {
 	private static final String DIV_PRODUCT_PRICE = "span[class=normal-price-ctn__sale-price_discount normal-price-ctn__sale-price]";
 	private static final String DIV_PRODUCT_NORMAL_PRICE = "span[class=normal-price-ctn__sale-price]";
 	
+	/**
+	 * Parâmetros de: acesso a página do produto
+	 */
+	private static final String DIV_PRODUCT_PAGE = "div[class=product-intro]";
+	private static final String DIV_PRODUCT_PAGE_TITLE = "h1[class=product-intro__head-name]";
+	private static final String DIV_PRODUCT_PAGE_PRICE = "div[class=discount from]";
+	private static final String DIV_PRODUCT_PAGE_IMG = "div[class=crop-image-container]";
+	
 	public Page<ScrapingItemDTO> searchForProduct(String product, int page, int size, String sort) {
 		Document document = null;
 		
@@ -74,6 +83,35 @@ public class SheinScrapingService {
 			String status = e.getMessage().substring(message.indexOf("=") + 1, message.indexOf(","));
 			
 			throw new ScrapingConnectionException("Something went wrong while trying to search for " + product, e, Integer.valueOf(status));
+		} catch (IOException e) {
+			throw new ScrapingConnectionException(e.getMessage());
+		}
+	}
+
+	public ScrapingItemDTO updateItemBasedOnLink(Item item) {
+		Document document = null;
+		
+		try {
+			document = Jsoup.connect(item.getLink()).get();
+			
+			ScrapingItemDTO dto = new ScrapingItemDTO();
+			
+			String title = document.select(DIV_PRODUCT_PAGE).select(DIV_PRODUCT_PAGE_TITLE).text();
+			String price = document.select(DIV_PRODUCT_PAGE).select(DIV_PRODUCT_PAGE_PRICE).attr("aria-label");
+			String img = document.select(DIV_PRODUCT_PAGE).select(DIV_PRODUCT_PAGE_IMG).attr("data-before-crop-src");
+			
+			dto.setLink(item.getLink());
+			dto.setName(title);
+			dto.setPrice(price.substring(price.indexOf("$") + 1).replace(",", "."));
+			dto.setImage("http:" + img);
+			dto.setSourcePlatform(SourcePlatform.SHEIN);
+			
+			return dto;
+		} catch(HttpStatusException e) {
+			String message = e.getMessage();
+			String status = e.getMessage().substring(message.indexOf("=") + 1, message.indexOf(","));
+			
+			throw new ScrapingConnectionException("Something went wrong while trying to search for " + item.getName(), e, Integer.valueOf(status));
 		} catch (IOException e) {
 			throw new ScrapingConnectionException(e.getMessage());
 		}

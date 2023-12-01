@@ -44,7 +44,6 @@ public class ScrapingController {
 	/**
 	 * 				A M A Z O N
 	 */
-	
 	@GetMapping(value = "/amazon/search")
 	public ResponseEntity<Page<ScrapingItemDTO>> searchForAmazonProduct(@RequestParam("product") String product,
 			@RequestParam(name = "page", defaultValue = "0") int page,
@@ -58,7 +57,6 @@ public class ScrapingController {
 	/**
 	 * 				S H E I N
 	 */
-	
 	@GetMapping(value = "/shein/search")
 	public ResponseEntity<Page<ScrapingItemDTO>> searchForSheinProduct(@RequestParam("product") String product,
 			@RequestParam(name = "page", defaultValue = "0") int page,
@@ -70,7 +68,6 @@ public class ScrapingController {
 	/**
 	 * 				S H E I N
 	 */
-	
 	@GetMapping(value = "/mercadolivre/search")
 	public ResponseEntity<Page<ScrapingItemDTO>> searchForMercadoLivreProduct(@RequestParam("product") String product,
 			@RequestParam(name = "page", defaultValue = "0") int page,
@@ -82,7 +79,6 @@ public class ScrapingController {
 	/**
 	 * 				A L I   E X P R E S S
 	 */
-	
 	@GetMapping(value = "/aliexpress/search")
 	public ResponseEntity<Page<ScrapingItemDTO>> searchForAliExpressProduct(@RequestParam("product") String product,
 			@RequestParam(name = "page", defaultValue = "0") int page,
@@ -94,7 +90,6 @@ public class ScrapingController {
 	/**
 	 * 				I N S E R T    I T E M S
 	 */
-	
 	@PostMapping(value = "/register/onWishlist/{id}")
 	public ResponseEntity<ItemDTO> insert(@RequestBody ScrapingItemDTO dto, @PathVariable Long id) {
 		ItemDTO item = itemService.insertScrapingProduct(id, dto);

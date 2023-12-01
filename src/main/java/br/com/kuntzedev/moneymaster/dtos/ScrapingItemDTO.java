@@ -19,11 +19,12 @@ public class ScrapingItemDTO implements Serializable {
 	public ScrapingItemDTO() {
 	}
 
-	public ScrapingItemDTO(BigDecimal price, String name, String link, String image) {
+	public ScrapingItemDTO(BigDecimal price, String name, String link, String image, SourcePlatform sourcePlatform) {
 		this.price = price;
 		this.name = name;
 		this.link = link;
 		this.image = image;
+		this.sourcePlatform = sourcePlatform;
 	}
 
 	public BigDecimal getPrice() {
