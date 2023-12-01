@@ -23,6 +23,7 @@ import br.com.kuntzedev.moneymaster.repositories.ItemRepository;
 import br.com.kuntzedev.moneymaster.repositories.WishlistRepository;
 import br.com.kuntzedev.moneymaster.services.exceptions.ResourceNotFoundException;
 import br.com.kuntzedev.moneymaster.services.exceptions.UnprocessableRequestException;
+import br.com.kuntzedev.moneymaster.services.scraping.ScrapingMediatorService;
 
 @Service
 public class ItemService {
@@ -38,6 +39,9 @@ public class ItemService {
 	
 	@Autowired
 	private WishlistRepository wishlistRepository;
+	
+	@Autowired
+	private ScrapingMediatorService scrapingMediator;
 	
 	private static final String RNFE = "Resource not found in the database.";
 	private static final String NULL_PARAM = "Null parameter.";
@@ -136,6 +140,28 @@ public class ItemService {
 			entity = itemRepository.save(entity);
 		} else {
 			throw new UnprocessableRequestException(NULL_PARAM);
+		}
+	}
+	
+	@Transactional
+	public void updateItemBasedOnLink(ItemDTO item) {
+		if(item != null) {
+			Item entity = itemRepository.findById(item.getId()).orElseThrow(() -> new ResourceNotFoundException(RNFE));
+			
+			ScrapingItemDTO dto = scrapingMediator.updateItemBasedOnLink(entity, entity.getSourcePlatform());
+			ItemDTO product = new ItemDTO();
+			
+			product.setImage(dto.getImage());
+			product.setLink(dto.getLink());
+			product.setName(dto.getName());
+			product.setSourcePlatform(dto.getSourcePlatform());
+			product.setPrice(dto.getPrice());
+			
+			product.setItemHistory(entity.getItemHistory());
+			product.setVariation(entity.getVariation()); //aqui provavelmente vai mudar
+			product.setId(entity.getId());
+			
+			this.update(item.getId(), product);
 		}
 	}
 	

@@ -5,6 +5,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.jsoup.HttpStatusException;
 import org.jsoup.Jsoup;
@@ -17,6 +18,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import br.com.kuntzedev.moneymaster.dtos.ScrapingItemDTO;
+import br.com.kuntzedev.moneymaster.entities.Item;
 import br.com.kuntzedev.moneymaster.enums.SourcePlatform;
 import br.com.kuntzedev.moneymaster.services.scraping.exceptions.InvalidLinkException;
 import br.com.kuntzedev.moneymaster.services.scraping.exceptions.ScrapingConnectionException;
@@ -62,7 +64,7 @@ public class AliExpressScrapingService {
 					
 					item.setName(getProductTitle(document, j));
 					item.setImage(getProductImage(document, j));
-					item.setLink(getProductLink(document, j));
+					item.setLink("https://" + getProductLink(document, j));
 					item.setPrice(getProductPrice(document, j));
 					item.setSourcePlatform(SourcePlatform.ALI_EXPRESS);
 					
@@ -80,6 +82,19 @@ public class AliExpressScrapingService {
 		} catch (IOException e) {
 			throw new ScrapingConnectionException(e.getMessage());
 		}
+	}
+
+	public ScrapingItemDTO updateItemBasedOnLink(Item item) {
+		String productName = item.getName().substring(0, item.getName().indexOf(" "));
+		
+		List<ScrapingItemDTO> result = searchForProduct(productName, 0, 10, "name")
+				.getContent()
+				.stream()
+				.filter(el -> el.getName().equals(item.getName()))
+				.collect(Collectors.toList());
+		
+		ScrapingItemDTO actual = result.get(0);
+		return new ScrapingItemDTO(actual.getPrice(), actual.getName(), actual.getLink(), actual.getImage(), SourcePlatform.ALI_EXPRESS);
 	}
 
 	private Elements getProducts(Document document) {

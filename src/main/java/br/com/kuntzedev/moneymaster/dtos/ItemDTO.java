@@ -23,6 +23,14 @@ public class ItemDTO implements Serializable {
 	public ItemDTO() {
 	}
 	
+	public ItemDTO(ScrapingItemDTO dto) {
+		this.name = dto.getName();
+		this.image = dto.getImage();
+		this.link = dto.getLink();
+		this.price = dto.getPrice();
+		this.sourcePlatform = dto.getSourcePlatform();
+	}
+	
 	public ItemDTO(Item item) {
 		this.id = item.getId();
 		this.name = item.getName();

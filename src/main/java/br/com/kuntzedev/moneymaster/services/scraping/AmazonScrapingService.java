@@ -5,6 +5,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.jsoup.HttpStatusException;
 import org.jsoup.Jsoup;
@@ -17,6 +18,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import br.com.kuntzedev.moneymaster.dtos.ScrapingItemDTO;
+import br.com.kuntzedev.moneymaster.entities.Item;
 import br.com.kuntzedev.moneymaster.enums.SourcePlatform;
 import br.com.kuntzedev.moneymaster.services.builders.LinkBuilder;
 import br.com.kuntzedev.moneymaster.services.scraping.exceptions.InvalidLinkException;
@@ -92,6 +94,22 @@ public class AmazonScrapingService {
 		}
 	}
 
+	/**
+	 * Não é possível acessar um link de produto diretamente, portanto esta é a melhor aproximação possível.
+	 * @param item
+	 * @return
+	 */
+	public ScrapingItemDTO updateItemBasedOnLink(Item item) {
+		List<ScrapingItemDTO> result = searchForProduct(item.getName(), 0, 10, "name", false, false)
+				.getContent()
+				.stream()
+				.filter(el -> el.getName().equals(item.getName()))
+				.collect(Collectors.toList());
+		
+		ScrapingItemDTO actual = result.get(0);
+		return new ScrapingItemDTO(actual.getPrice(), actual.getName(), actual.getLink(), actual.getImage(), SourcePlatform.AMAZON);
+	}
+
 	private Elements getProducts(Document doc) {
 		return doc.select(DIV_PRODUCT);
 	}
@@ -125,6 +143,7 @@ public class AmazonScrapingService {
 	
 	private String formatLinkToSearch(String product, boolean prime, boolean freeShiping) {
 		String formattedProduct = "";
+		product = product.replace("%", "");
 		try {
 			formattedProduct = URLEncoder.encode(product, "UTF-8").replace("+", "%20");
 		} catch (UnsupportedEncodingException e) {

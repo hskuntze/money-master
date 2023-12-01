@@ -57,6 +57,12 @@ public class ItemController {
 	/**
 	 * -------------- PUTS --------------
 	 */
+	
+	@PutMapping(value = "/update/bylink")
+	public ResponseEntity<Void> update(@RequestBody ItemDTO dto) {
+		itemService.updateItemBasedOnLink(dto);
+		return ResponseEntity.ok().build();
+	}
 
 	@PutMapping(value = "/update/{id}")
 	public ResponseEntity<ItemDTO> update(@RequestBody ItemDTO dto, @PathVariable Long id) {
