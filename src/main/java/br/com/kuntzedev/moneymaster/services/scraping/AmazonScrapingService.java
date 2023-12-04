@@ -14,7 +14,7 @@ import org.jsoup.select.Elements;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import br.com.kuntzedev.moneymaster.dtos.ScrapingItemDTO;
@@ -56,7 +56,7 @@ public class AmazonScrapingService {
 	
 	private static final String USER_AGENT = "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:109.0) Gecko/20100101 Firefox/119.0";
 	
-	public Page<ScrapingItemDTO> searchForProduct(String product, int page, int size, String sort, boolean prime, boolean freeShiping) {
+	public Page<ScrapingItemDTO> searchForProduct(String product, int page, int size, boolean prime, boolean freeShiping) {
 		Document document = null;
 		
 		try {
@@ -82,8 +82,12 @@ public class AmazonScrapingService {
 				items.add(item);
 			}
 			
-			PageRequest pageRequest = PageRequest.of(page, size, Sort.by(Sort.Order.by(sort)));
-			return new PageImpl<ScrapingItemDTO>(items, pageRequest, items.size());
+			Pageable pageRequest = PageRequest.of(page, size);
+			int start = (int) pageRequest.getOffset();
+			int end = Math.min((start + pageRequest.getPageSize()), items.size());
+			List<ScrapingItemDTO> pageContent = items.subList(start, end);
+
+			return new PageImpl<>(pageContent, pageRequest, items.size());
 		} catch (HttpStatusException e) {
 			String message = e.getMessage();
 			String status = e.getMessage().substring(message.indexOf("=") + 1, message.indexOf(","));
@@ -100,7 +104,7 @@ public class AmazonScrapingService {
 	 * @return
 	 */
 	public ScrapingItemDTO updateItemBasedOnLink(Item item) {
-		List<ScrapingItemDTO> result = searchForProduct(item.getName(), 0, 10, "name", false, false)
+		List<ScrapingItemDTO> result = searchForProduct(item.getName(), 0, 10, false, false)
 				.getContent()
 				.stream()
 				.filter(el -> el.getName().equals(item.getName()))

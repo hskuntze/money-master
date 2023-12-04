@@ -45,46 +45,42 @@ public class ScrapingController {
 	 * 				A M A Z O N
 	 */
 	@GetMapping(value = "/amazon/search")
-	public ResponseEntity<Page<ScrapingItemDTO>> searchForAmazonProduct(@RequestParam("product") String product,
-			@RequestParam(name = "page", defaultValue = "0") int page,
-			@RequestParam(value = "size", defaultValue = "10") int size,
-			@RequestParam(value = "sort", defaultValue = "name") String sort,
-			@RequestParam(value = "prime", defaultValue = "false") boolean prime,
-			@RequestParam(value = "freeShiping", defaultValue = "false") boolean freeShiping){
-		return ResponseEntity.ok().body(amazonScrapingService.searchForProduct(product, page, size, sort, prime, freeShiping));
+	public ResponseEntity<Page<ScrapingItemDTO>> searchForAmazonProduct(@RequestParam String product,
+			@RequestParam(defaultValue = "0") int page,
+			@RequestParam(defaultValue = "10") int size,
+			@RequestParam(defaultValue = "false") boolean prime,
+			@RequestParam(defaultValue = "false") boolean freeShiping){
+		return ResponseEntity.ok().body(amazonScrapingService.searchForProduct(product, page, size, prime, freeShiping));
 	}
 	
 	/**
 	 * 				S H E I N
 	 */
 	@GetMapping(value = "/shein/search")
-	public ResponseEntity<Page<ScrapingItemDTO>> searchForSheinProduct(@RequestParam("product") String product,
-			@RequestParam(name = "page", defaultValue = "0") int page,
-			@RequestParam(value = "size", defaultValue = "10") int size,
-			@RequestParam(value = "sort", defaultValue = "name") String sort){
-		return ResponseEntity.ok().body(sheinScrapingService.searchForProduct(product, page, size, sort));
+	public ResponseEntity<Page<ScrapingItemDTO>> searchForSheinProduct(@RequestParam String product,
+			@RequestParam(defaultValue = "0") int page,
+			@RequestParam(defaultValue = "10") int size){
+		return ResponseEntity.ok().body(sheinScrapingService.searchForProduct(product, page, size));
 	}
 	
 	/**
 	 * 				S H E I N
 	 */
 	@GetMapping(value = "/mercadolivre/search")
-	public ResponseEntity<Page<ScrapingItemDTO>> searchForMercadoLivreProduct(@RequestParam("product") String product,
-			@RequestParam(name = "page", defaultValue = "0") int page,
-			@RequestParam(value = "size", defaultValue = "10") int size,
-			@RequestParam(value = "sort", defaultValue = "name") String sort){
-		return ResponseEntity.ok().body(mercadoLivreScrapingService.searchForProduct(product, page, size, sort));
+	public ResponseEntity<Page<ScrapingItemDTO>> searchForMercadoLivreProduct(@RequestParam String product,
+			@RequestParam(defaultValue = "0") int page,
+			@RequestParam(defaultValue = "10") int size){
+		return ResponseEntity.ok().body(mercadoLivreScrapingService.searchForProduct(product, page, size));
 	}
 	
 	/**
 	 * 				A L I   E X P R E S S
 	 */
 	@GetMapping(value = "/aliexpress/search")
-	public ResponseEntity<Page<ScrapingItemDTO>> searchForAliExpressProduct(@RequestParam("product") String product,
-			@RequestParam(name = "page", defaultValue = "0") int page,
-			@RequestParam(value = "size", defaultValue = "10") int size,
-			@RequestParam(value = "sort", defaultValue = "name") String sort){
-		return ResponseEntity.ok().body(aliExpressScrapingService.searchForProduct(product, page, size, sort));
+	public ResponseEntity<Page<ScrapingItemDTO>> searchForAliExpressProduct(@RequestParam String product,
+			@RequestParam(defaultValue = "0") int page,
+			@RequestParam(defaultValue = "10") int size){
+		return ResponseEntity.ok().body(aliExpressScrapingService.searchForProduct(product, page, size));
 	}
 	
 	/**
