@@ -5,9 +5,7 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -47,10 +45,9 @@ public class ItemService {
 	private static final String NULL_PARAM = "Null parameter.";
 	
 	@Transactional(readOnly = true)
-	public Page<ItemDTO> findAll(int page, int size, String sort) {
-		List<Item> list = itemRepository.findAllItemsWithHistory();
-		PageRequest pageRequest = PageRequest.of(page, size, Sort.by(Sort.Order.asc(sort)));
-		return new PageImpl<Item>(list, pageRequest, list.size()).map(ItemDTO::new);
+	public Page<ItemDTO> findAll(Pageable pageable) {
+		Page<Item> page = itemRepository.findAllItemsWithHistory(pageable);
+		return page.map(ItemDTO::new);
 	}
 	
 	@Transactional(readOnly = true)

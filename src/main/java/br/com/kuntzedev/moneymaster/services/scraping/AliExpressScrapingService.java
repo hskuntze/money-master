@@ -14,7 +14,7 @@ import org.jsoup.select.Elements;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import br.com.kuntzedev.moneymaster.dtos.ScrapingItemDTO;
@@ -45,7 +45,7 @@ public class AliExpressScrapingService {
 	private static final String DIV_PRODUCT_PRICE = "div[class*=multi--price-sale--]";
 	private static final String DIV_PAGINATION = "div[class=comet-pagination-options-quick-jumper]";
 	
-	public Page<ScrapingItemDTO> searchForProduct(String product, int page, int size, String sort) {
+	public Page<ScrapingItemDTO> searchForProduct(String product, int page, int size) {
 		Document document = null;
 		
 		try {
@@ -72,8 +72,12 @@ public class AliExpressScrapingService {
 				}
 			}
 			
-			PageRequest pageRequest = PageRequest.of(page, size, Sort.unsorted());
-			return new PageImpl<>(items, pageRequest, items.size());
+			Pageable pageRequest = PageRequest.of(page, size);
+			int start = (int) pageRequest.getOffset();
+			int end = Math.min((start + pageRequest.getPageSize()), items.size());
+			List<ScrapingItemDTO> pageContent = items.subList(start, end);
+			
+			return new PageImpl<>(pageContent, pageRequest, items.size());
 		} catch(HttpStatusException e) {
 			String message = e.getMessage();
 			String status = e.getMessage().substring(message.indexOf("=") + 1, message.indexOf(","));
@@ -87,7 +91,7 @@ public class AliExpressScrapingService {
 	public ScrapingItemDTO updateItemBasedOnLink(Item item) {
 		String productName = item.getName().substring(0, item.getName().indexOf(" "));
 		
-		List<ScrapingItemDTO> result = searchForProduct(productName, 0, 10, "name")
+		List<ScrapingItemDTO> result = searchForProduct(productName, 0, 10)
 				.getContent()
 				.stream()
 				.filter(el -> el.getName().equals(item.getName()))

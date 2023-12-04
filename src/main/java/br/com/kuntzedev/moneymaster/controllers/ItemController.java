@@ -4,6 +4,7 @@ import java.net.URI;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -13,7 +14,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
@@ -30,12 +30,10 @@ public class ItemController {
 	/**
 	 * -------------- GETS --------------
 	 */
-	
+
 	@GetMapping
-	public ResponseEntity<Page<ItemDTO>> findAll(@RequestParam(name = "page", defaultValue = "0") int page,
-			@RequestParam(value = "size", defaultValue = "10") int size,
-			@RequestParam(value = "sort", defaultValue = "id") String sort) {
-		return ResponseEntity.ok().body(itemService.findAll(page, size, sort));
+	public ResponseEntity<Page<ItemDTO>> findAll(Pageable pageable) {
+		return ResponseEntity.ok().body(itemService.findAll(pageable));
 	}
 
 	@GetMapping(value = "/{id}")

@@ -1,8 +1,9 @@
 package br.com.kuntzedev.moneymaster.repositories;
 
-import java.util.List;
 import java.util.Optional;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
@@ -19,6 +20,9 @@ public interface ItemRepository extends JpaRepository<Item, Long> {
 	
 	@Query(value = "SELECT DISTINCT i FROM Item i "
 			+ "LEFT JOIN FETCH i.itemHistory ih "
-			+ "LEFT JOIN FETCH ih.itemPrices")
-	List<Item> findAllItemsWithHistory();
+			+ "LEFT JOIN FETCH ih.itemPrices",
+			countQuery = "SELECT DISTINCT i FROM Item i "
+					+ "LEFT JOIN i.itemHistory ih "
+					+ "LEFT JOIN ih.itemPrices")
+	Page<Item> findAllItemsWithHistory(Pageable pageable);
 }

@@ -13,7 +13,7 @@ import org.jsoup.select.Elements;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import br.com.kuntzedev.moneymaster.dtos.ScrapingItemDTO;
@@ -52,7 +52,7 @@ public class MercadoLivreScrapingService {
 	
 	private static final String USER_AGENT = "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:109.0) Gecko/20100101 Firefox/119.0";
 	
-	public Page<ScrapingItemDTO> searchForProduct(String product, int page, int size, String sort) {
+	public Page<ScrapingItemDTO> searchForProduct(String product, int page, int size) {
 		Document document = null;
 		
 		try {
@@ -73,8 +73,12 @@ public class MercadoLivreScrapingService {
 				items.add(item);
 			}
 			
-			PageRequest pageRequest = PageRequest.of(page, size, Sort.unsorted());
-			return new PageImpl<>(items, pageRequest, items.size());
+			Pageable pageRequest = PageRequest.of(page, size);
+			int start = (int) pageRequest.getOffset();
+			int end = Math.min((start + pageRequest.getPageSize()), items.size());
+			List<ScrapingItemDTO> pageContent = items.subList(start, end);
+			
+			return new PageImpl<>(pageContent, pageRequest, items.size());
 		} catch(HttpStatusException e) {
 			String message = e.getMessage();
 			String status = e.getMessage().substring(message.indexOf("=") + 1, message.indexOf(","));
@@ -132,7 +136,7 @@ public class MercadoLivreScrapingService {
 	
 	private String getProductLink(Document document, int index) {
 		int i = index == 0 ? 0 : index;
-		return document.select(DIV_PRODUCT).get(i).select("div.ui-search-result__content") .select(DIV_PRODUCT_LINK).attr("href");
+		return document.select(DIV_PRODUCT).get(i).select("div[class*=ui-search-result__content]") .select(DIV_PRODUCT_LINK).attr("href");
 	}
 	
 	private String getProductPrice(Document document, int index) {
@@ -142,9 +146,9 @@ public class MercadoLivreScrapingService {
 		Elements fractionPrice = document.select(DIV_PRODUCT).get(i).select(DIV_PRODUCT_PRICE).select(DIV_PRODUCT_PRICE_CENTS);
 		
 		if(!fractionPrice.isEmpty()) {
-			return intPrice.text() + "." + fractionPrice.text();
+			return intPrice.text().replace(".", "") + "." + fractionPrice.text();
 		} else {
-			return intPrice.text() + ".0";
+			return intPrice.text().replace(".", "") + ".0";
 		}
 	}
 

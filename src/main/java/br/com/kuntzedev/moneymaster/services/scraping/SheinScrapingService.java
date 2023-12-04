@@ -13,7 +13,7 @@ import org.jsoup.select.Elements;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import br.com.kuntzedev.moneymaster.dtos.ScrapingItemDTO;
@@ -55,7 +55,7 @@ public class SheinScrapingService {
 	private static final String DIV_PRODUCT_PAGE_PRICE = "div[class=discount from]";
 	private static final String DIV_PRODUCT_PAGE_IMG = "div[class=crop-image-container]";
 	
-	public Page<ScrapingItemDTO> searchForProduct(String product, int page, int size, String sort) {
+	public Page<ScrapingItemDTO> searchForProduct(String product, int page, int size) {
 		Document document = null;
 		
 		try {
@@ -76,8 +76,12 @@ public class SheinScrapingService {
 				items.add(item);
 			}
 			
-			PageRequest pageRequest = PageRequest.of(page, size, Sort.by(Sort.Order.by(sort)));
-			return new PageImpl<ScrapingItemDTO>(items, pageRequest, items.size());
+			Pageable pageRequest = PageRequest.of(page, size);
+			int start = (int) pageRequest.getOffset();
+			int end = Math.min((start + pageRequest.getPageSize()), items.size());
+			List<ScrapingItemDTO> pageContent = items.subList(start, end);
+			
+			return new PageImpl<>(pageContent, pageRequest, items.size());
 		} catch(HttpStatusException e) {
 			String message = e.getMessage();
 			String status = e.getMessage().substring(message.indexOf("=") + 1, message.indexOf(","));
