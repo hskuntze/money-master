@@ -57,6 +57,13 @@ public class WishlistService {
 	}
 	
 	@Transactional(readOnly = true)
+	public Page<WishlistDTO> findByTitleAndAuthenticatedUser(Pageable pageable, String title){
+		Long id = authenticationService.authenticated().getId();
+		Page<Wishlist> wishlist = wishlistRepository.findByTitleAndAuthenticatedUser(pageable, title, id);
+		return wishlist.map(WishlistDTO::new);
+	}
+	
+	@Transactional(readOnly = true)
 	public Wishlist findReference(Long id) {
 		if(id != null) {
 			return wishlistRepository.getReferenceById(id);

@@ -89,7 +89,7 @@ public class UserController {
 			FRONT_APP_URL = "http://localhost:3000";
 		}
 
-		return ResponseEntity.status(HttpStatus.FOUND).location(URI.create(FRONT_APP_URL + "/confirmRegistration"))
+		return ResponseEntity.status(HttpStatus.FOUND).location(URI.create(FRONT_APP_URL + "/confirmregistration"))
 				.build();
 	}
 
@@ -110,7 +110,7 @@ public class UserController {
 		}
 
 		return ResponseEntity.status(HttpStatus.FOUND)
-				.location(URI.create(FRONT_APP_URL + "/auth/recoverPassword/" + token)).build();
+				.location(URI.create(FRONT_APP_URL + "/auth/recoverpassword/" + token)).build();
 	}
 	
 	/**

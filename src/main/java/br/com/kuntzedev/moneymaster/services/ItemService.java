@@ -85,7 +85,6 @@ public class ItemService {
 			entity.setLink(dto.getLink());
 			entity.setPrice(dto.getPrice());
 			entity.setSourcePlatform(dto.getSourcePlatform());
-			entity.setVariation(0.0f);
 			entity.setWishlist(wishlistRepository.findById(wishlistId).orElseThrow(() -> new ResourceNotFoundException("Wishlist: " + RNFE)));
 			entity = itemRepository.save(entity);
 			
@@ -105,7 +104,7 @@ public class ItemService {
 			
 			dtoToEntity(entity, dto);
 			
-			if(!entity.getPrice().equals(dto.getPrice())) {
+			if(entity.getPrice().compareTo(dto.getPrice()) != 0) {
 				entity.setPrice(dto.getPrice());
 				
 				ItemPrice newItemPrice = new ItemPrice();
@@ -155,7 +154,6 @@ public class ItemService {
 			product.setPrice(dto.getPrice());
 			
 			product.setItemHistory(entity.getItemHistory());
-			product.setVariation(entity.getVariation()); //aqui provavelmente vai mudar
 			product.setId(entity.getId());
 			
 			this.update(item.getId(), product);

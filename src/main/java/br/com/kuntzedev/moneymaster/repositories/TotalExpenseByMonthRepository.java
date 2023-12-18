@@ -2,6 +2,8 @@ package br.com.kuntzedev.moneymaster.repositories;
 
 import java.util.Optional;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
@@ -20,4 +22,10 @@ public interface TotalExpenseByMonthRepository extends JpaRepository<TotalExpens
 			+ "WHERE tbem.expenseTrack.user.id = :userId "
 			+ "AND EXTRACT(MONTH FROM tbem.date) = :month")
 	Optional<TotalExpenseByMonth> findByMonth(Long userId, int month);
+	
+	@Query(value = "SELECT tbem FROM TotalExpenseByMonth tbem "
+			+ "WHERE tbem.expenseTrack.user.id = :userId",
+			countQuery = "SELECT tbem FROM TotalExpenseByMonth tbem "
+					+ "	WHERE tbem.expenseTrack.user.id = :userId")
+	Page<TotalExpenseByMonth> findByUser(Long userId, Pageable pageable);
 }

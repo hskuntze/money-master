@@ -24,4 +24,9 @@ public interface WishlistRepository extends JpaRepository<Wishlist, Long>{
 					+ "LEFT JOIN w.items "
 					+ "WHERE w.user.id = :userId")
 	Optional<Page<Wishlist>> findByUserId(Pageable pageable, Long userId);
+	
+	@Query(value = "SELECT DISTINCT w FROM Wishlist w "
+			+ "WHERE (LOWER(w.title) LIKE LOWER(CONCAT('%',:title,'%'))) "
+			+ "AND w.user.id = :userId")	
+	Page<Wishlist> findByTitleAndAuthenticatedUser(Pageable pageable, String title, Long userId);
 }

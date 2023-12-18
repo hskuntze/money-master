@@ -33,7 +33,6 @@ public class Item implements Serializable {
 	private String link;
 	@Column(columnDefinition = "TEXT")
 	private String image;
-	private Float variation;
 	private SourcePlatform sourcePlatform;
 	
 	@ManyToOne(fetch = FetchType.LAZY)
@@ -86,14 +85,6 @@ public class Item implements Serializable {
 		this.image = image;
 	}
 
-	public Float getVariation() {
-		return variation;
-	}
-
-	public void setVariation(Float variation) {
-		this.variation = variation;
-	}
-
 	public Wishlist getWishlist() {
 		return wishlist;
 	}
@@ -143,6 +134,6 @@ public class Item implements Serializable {
 	@Override
 	public String toString() {
 		return "Item [id=" + id + ", name=" + name + ", price=" + price + ", link=" + link + ", image=" + image
-				+ ", variation=" + variation + ", sourcePlatform=" + sourcePlatform + "]";
+				+ ", sourcePlatform=" + sourcePlatform + "]";
 	}
 }

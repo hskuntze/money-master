@@ -39,6 +39,13 @@ public class VaultService {
 	private static final String NOT_ACCEPTABLE = "This value can't be accepted. Try a value that is greater than 0 (zero).";
 	
 	@Transactional(readOnly = true)
+	public VaultDTO findByAuthenticatedUser() {
+		User user = authenticationService.authenticated();
+		Vault vault = vaultRepository.findById(user.getVault().getId()).orElseThrow(() -> new ResourceNotFoundException(RNFE));
+		return new VaultDTO(vault);
+	}
+	
+	@Transactional(readOnly = true)
 	public VaultDTO findVaultById(Long id) {
 		Vault vault = vaultRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException(RNFE));
 		return new VaultDTO(vault);
@@ -57,7 +64,7 @@ public class VaultService {
 	public VaultDTO insert(Vault entity) {
 		if(entity != null) {
 			entity = vaultRepository.save(entity);
-			flush();
+			vaultRepository.flush();
 			return new VaultDTO(entity);
 		} else {
 			throw new UnprocessableRequestException(NULL_PARAM);
@@ -71,7 +78,7 @@ public class VaultService {
 			Vault entity = new Vault();
 			dtoToEntity(entity, dto);
 			entity = vaultRepository.save(entity);
-			flush();
+			vaultRepository.flush();
 			return new VaultDTO(entity);
 		} else {
 			throw new UnprocessableRequestException(NULL_PARAM);
@@ -88,7 +95,7 @@ public class VaultService {
 			entity.setSavings(newEntity.getSavings());
 			
 			entity = vaultRepository.save(entity);
-			flush();
+			vaultRepository.flush();
 			return new VaultDTO(entity);
 		} else {
 			throw new UnprocessableRequestException(NULL_PARAM);
@@ -263,10 +270,6 @@ public class VaultService {
 		}
 		
 		return wishlists;
-	}
-	
-	private void flush() {
-		vaultRepository.flush();
 	}
 
 	private void dtoToEntity(Vault entity, VaultDTO dto) {
