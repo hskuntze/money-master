@@ -42,6 +42,11 @@ public class VaultController {
 		return ResponseEntity.ok().body(vaultService.findVaultById(id));
 	}
 	
+	@GetMapping(value = "/authenticated")
+	public ResponseEntity<VaultDTO> findByAuthenticatedUser() {
+		return ResponseEntity.ok().body(vaultService.findByAuthenticatedUser());
+	}
+	
 	/**
 	 * -------------- POSTS --------------
 	 */

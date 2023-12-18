@@ -32,12 +32,12 @@ public class AmazonScrapingService {
 	 */
 	private static final String BASE_URL = "https://www.amazon.com.br";
 	private static final String SEARCH_PARAMETER = "/s?k=";
-	private static final String REF_PARAMETER = "&ref=nb_sb_noss";
+	private static final String REF_PARAMETER = "&ref=nb_sb_ss_recent_3_0_recent";
 	private static final String MK_PT_BR_PARAMETER = "&__mk_pt_BR=ÅMÅŽÕÑ";
 	private static final String PREFIX_PARAMETER = "&sprefix=";
 	private static final String PRIME_PARAMETER = "&rh=p_85%3A19171728011";
 	private static final String FREE_SHIPING_PARAMETER = "&rh=p_n_free_shipping_eligible%3A19171733011";
-	private static final String CRID_PARAMETER = "&crid=0";
+	private static final String CRID_PARAMETER = "&crid=XYWITF7IPRFH";
 	
 	/**
 	 * Parâmetros de: preços
@@ -50,11 +50,12 @@ public class AmazonScrapingService {
 	private static final String DIV_PRODUCT = "div[class*=sg-col-4-of-24 sg-col-4-of-12 s-result-item s-asin sg-col-4-of-16]";
 	private static final String DIV_PRODUCT_TITLE = "a[class=a-link-normal s-underline-text s-underline-link-text s-link-style a-text-normal]";
 	private static final String DIV_PRODUCT_LINK = "a[class=a-link-normal s-no-outline]";
-	private static final String DIV_PRODUCT_IMAGE = "div[class=a-section aok-relative s-image-square-aspect]";
+	private static final String DIV_PRODUCT_IMAGE = "div[class*=a-section aok-relative s-image]";
 	private static final String IMG_TAG = "img[class=s-image]";
 	private static final String TITLE_TAG = "span[class=a-size-base-plus a-color-base a-text-normal]";
 	
-	private static final String USER_AGENT = "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:109.0) Gecko/20100101 Firefox/119.0";
+	private static final String USER_AGENT = "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/47.0.2526.111 Safari/537.36";
+	private int retries = 0;
 	
 	public Page<ScrapingItemDTO> searchForProduct(String product, int page, int size, boolean prime, boolean freeShiping) {
 		Document document = null;
@@ -64,6 +65,7 @@ public class AmazonScrapingService {
 					.cookie("i18n-prefs", "BRL")
 					.cookie("lc-acbbr", "pt_BR")
 					.cookie("session-id", "145-9560743-4533017")
+					.header("Accept-Language", "en-US;q=0.5,en;q=0.3")
 					.userAgent(USER_AGENT)
 					.get();
 			
@@ -89,10 +91,20 @@ public class AmazonScrapingService {
 
 			return new PageImpl<>(pageContent, pageRequest, items.size());
 		} catch (HttpStatusException e) {
-			String message = e.getMessage();
-			String status = e.getMessage().substring(message.indexOf("=") + 1, message.indexOf(","));
-			
-			throw new ScrapingConnectionException("Something went wrong while trying to search for " + product, e, Integer.valueOf(status));
+			if(retries <= 2) {
+				retries++;
+				
+				Page<ScrapingItemDTO> result = this.searchForProduct(product, page, size, prime, freeShiping);
+				retries = 0;
+				return result;
+			} else {
+				retries = 0;
+				
+				String message = e.getMessage();
+				String status = e.getMessage().substring(message.indexOf("=") + 1, message.indexOf(","));
+				
+				throw new ScrapingConnectionException("Something went wrong while trying to search for " + product, e, Integer.valueOf(status));
+			}
 		} catch (IOException e) {
 			throw new ScrapingConnectionException(e.getMessage());
 		}

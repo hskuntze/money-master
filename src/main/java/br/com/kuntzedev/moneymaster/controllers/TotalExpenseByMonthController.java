@@ -31,8 +31,17 @@ public class TotalExpenseByMonthController {
 	 */
 	
 	@GetMapping(value = "/{id}")
-	public ResponseEntity<TotalExpenseByMonthDTO> findById(@PathVariable Long id) {
-		return ResponseEntity.ok().body(tebmService.findById(id));
+	public ResponseEntity<TotalExpenseByMonthDTO> findById(@PathVariable Long id,
+			@RequestParam(name = "sortExpenses", defaultValue = "false") boolean sortExpenses,
+			@RequestParam(name = "sortExpenseAttribute", defaultValue = "") String sortExpenseAttribute) {
+		return ResponseEntity.ok().body(tebmService.findById(id, sortExpenses, sortExpenseAttribute));
+	}
+	
+	@GetMapping(value = "/authenticated")
+	public ResponseEntity<Page<TotalExpenseByMonthDTO>> findByAuthenticatedUser(Pageable pageable, 
+			@RequestParam(name = "sortExpenses", defaultValue = "false") boolean sortExpenses,
+			@RequestParam(name = "sortExpenseAttribute", defaultValue = "") String sortExpenseAttribute) {
+		return ResponseEntity.ok().body(tebmService.findByAuthenticatedUser(pageable, sortExpenses, sortExpenseAttribute));
 	}
 	
 	@GetMapping(value = "/verifyExistence")

@@ -47,7 +47,9 @@ public class MercadoLivreScrapingService {
 	 */
 	private static final String DIV_PRODUCT_PAGE = "div[class*=ui-pdp-container__row ui-pdp-with--separator--fluid ui-pdp-with--separator--40]";
 	private static final String DIV_PRODUCT_PAGE_TITLE = "h1[class*=ui-pdp-title]";
-	private static final String DIV_PRODUCT_PAGE_PRICE = "meta[itemprop=price]";
+	private static final String DIV_PRODUCT_PAGE_PRICE = "span[class=andes-money-amount ui-pdp-price__part andes-money-amount--cents-superscript andes-money-amount--compact]";
+	private static final String DIV_PRODUCT_PAGE_PRICE_INT = "span[class=andes-money-amount__fraction]";
+	private static final String DIV_PRODUCT_PAGE_PRICE_FRACTION = "span[class*=andes-money-amount__cents]";
 	private static final String DIV_PRODUCT_PAGE_IMG = "img[class=ui-pdp-image ui-pdp-gallery__figure__image]";
 	
 	private static final String USER_AGENT = "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:109.0) Gecko/20100101 Firefox/119.0";
@@ -101,7 +103,10 @@ public class MercadoLivreScrapingService {
 			
 			String title = document.select(DIV_PRODUCT_PAGE).select(DIV_PRODUCT_PAGE_TITLE).text();
 			String img = document.select(DIV_PRODUCT_PAGE).select(DIV_PRODUCT_PAGE_IMG).attr("src");
-			String price = document.select(DIV_PRODUCT_PAGE).select(DIV_PRODUCT_PAGE_PRICE).attr("content");
+			
+			String priceInt = document.select(DIV_PRODUCT_PAGE_PRICE).get(0).select(DIV_PRODUCT_PAGE_PRICE_INT).text();
+			String priceFraction = document.select(DIV_PRODUCT_PAGE_PRICE).get(0).select(DIV_PRODUCT_PAGE_PRICE_FRACTION).text();
+			String price = priceInt.replace(".", "") + "." + priceFraction;
 
 			dto.setLink(item.getLink());
 			dto.setName(title);
