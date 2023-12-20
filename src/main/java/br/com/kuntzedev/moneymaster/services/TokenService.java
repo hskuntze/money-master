@@ -111,16 +111,20 @@ public class TokenService {
 	
 	public void validatePasswordRecoveryToken(String token) {
 		Optional<PasswordRecoveryToken> tk = passwordRecoveryTokenRepository.findByToken(token);
-		Calendar calendar = Calendar.getInstance();
 		
-		boolean expired = tk.get().getExpiryDate().before(calendar.getTime());
-		
-		if(tk.isEmpty()) {
-			throw new ResourceNotFoundException(RNFE);
-		}
-		
-		if(expired) {
-			throw new InvalidTokenException(ITE + ITE_EXPIRED);
+		if(!tk.isEmpty()) {
+			Calendar calendar = Calendar.getInstance();
+			boolean expired = tk.get().getExpiryDate().before(calendar.getTime());
+			
+			if(tk.isEmpty()) {
+				throw new ResourceNotFoundException(RNFE);
+			}
+			
+			if(expired) {
+				throw new InvalidTokenException(ITE + ITE_EXPIRED);
+			}
+		} else {
+			throw new ResourceNotFoundException("Invalid token");
 		}
 	}
 }

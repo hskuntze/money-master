@@ -126,9 +126,9 @@ public class UserController {
 	 * @return
 	 */
 	@PostMapping(value = "/register")
-	public ResponseEntity<UserBasicDTO> insert(@Valid @RequestBody UserInsertDTO dto, HttpServletRequest request,
+	public ResponseEntity<UserBasicDTO> register(@Valid @RequestBody UserInsertDTO dto, HttpServletRequest request,
 			Errors errors) {
-		UserBasicDTO user = userService.insert(dto);
+		UserBasicDTO user = userService.register(dto);
 		URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(user.getId()).toUri();
 
 		String appUrl = getAppUrl(request);

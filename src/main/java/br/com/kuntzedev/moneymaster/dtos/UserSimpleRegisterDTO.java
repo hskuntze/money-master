@@ -1,36 +1,29 @@
 package br.com.kuntzedev.moneymaster.dtos;
 
 import java.io.Serializable;
-import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Set;
 
 import br.com.kuntzedev.moneymaster.entities.User;
-import br.com.kuntzedev.moneymaster.enums.GenderType;
-import br.com.kuntzedev.moneymaster.services.validators.VerifyUserExistence;
 
-@VerifyUserExistence
-public class UserDTO implements Serializable {
-	private static final long serialVersionUID = 5734701072206258380L;
-
+public class UserSimpleRegisterDTO implements Serializable {
+	private static final long serialVersionUID = -4680619636248455326L;
+	
 	private Long id;
 	private String name;
 	private String email;
 	private String phoneNumber;
 	private Long idNumber;
 	private Integer idType;
-	private LocalDate birth;
 	private boolean enabled;
 	private boolean registrationCompleted;
-	private GenderType gender;
-	private AddressDTO address;
 	private Set<RoleDTO> roles = new HashSet<>();
 	private VaultDTO vault;
 	
-	public UserDTO() {
+	public UserSimpleRegisterDTO() {
 	}
 	
-	public UserDTO(User user) {
+	public UserSimpleRegisterDTO(User user) {
 		this.id = user.getId();
 		this.name = user.getName();
 		this.email = user.getEmail();
@@ -38,11 +31,7 @@ public class UserDTO implements Serializable {
 		this.idNumber = user.getIdNumber();
 		this.idType = user.getIdType();
 		this.enabled = user.isEnabled();
-		this.birth = user.getBirth();
-		this.gender = user.getGender();
-		this.address = new AddressDTO(user.getAddress());
 		this.vault = new VaultDTO(user.getVault());
-		this.registrationCompleted = user.isRegistrationCompleted();
 		
 		this.roles.clear();
 		user.getRoles().forEach(role -> this.roles.add(new RoleDTO(role)));
@@ -96,36 +85,12 @@ public class UserDTO implements Serializable {
 		this.idType = idType;
 	}
 
-	public LocalDate getBirth() {
-		return birth;
-	}
-
-	public void setBirth(LocalDate birth) {
-		this.birth = birth;
-	}
-
 	public boolean isEnabled() {
 		return enabled;
 	}
 
 	public void setEnabled(boolean enabled) {
 		this.enabled = enabled;
-	}
-
-	public GenderType getGender() {
-		return gender;
-	}
-
-	public void setGender(GenderType gender) {
-		this.gender = gender;
-	}
-
-	public AddressDTO getAddress() {
-		return address;
-	}
-
-	public void setAddress(AddressDTO address) {
-		this.address = address;
 	}
 
 	public VaultDTO getVault() {
@@ -150,8 +115,8 @@ public class UserDTO implements Serializable {
 
 	@Override
 	public String toString() {
-		return "UserDTO [id=" + id + ", name=" + name + ", email=" + email + ", phoneNumber=" + phoneNumber
-				+ ", idNumber=" + idNumber + ", idType=" + idType + ", birth=" + birth + ", enabled=" + enabled
-				+ ", gender=" + gender + ", roles=" + roles + "]";
+		return "UserSimpleRegisterDTO [id=" + id + ", name=" + name + ", email=" + email + ", phoneNumber="
+				+ phoneNumber + ", idNumber=" + idNumber + ", idType=" + idType + ", enabled=" + enabled + ", roles="
+				+ roles + ", vault=" + vault + "]";
 	}
 }

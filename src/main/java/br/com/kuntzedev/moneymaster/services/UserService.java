@@ -17,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 import br.com.kuntzedev.moneymaster.dtos.UserBasicDTO;
 import br.com.kuntzedev.moneymaster.dtos.UserDTO;
 import br.com.kuntzedev.moneymaster.dtos.UserInsertDTO;
+import br.com.kuntzedev.moneymaster.dtos.UserSimpleRegisterDTO;
 import br.com.kuntzedev.moneymaster.dtos.tokens.TokenPasswordDTO;
 import br.com.kuntzedev.moneymaster.entities.Address;
 import br.com.kuntzedev.moneymaster.entities.Role;
@@ -28,6 +29,7 @@ import br.com.kuntzedev.moneymaster.repositories.UserRepository;
 import br.com.kuntzedev.moneymaster.services.exceptions.DeletionProcedureException;
 import br.com.kuntzedev.moneymaster.services.exceptions.InvalidPasswordException;
 import br.com.kuntzedev.moneymaster.services.exceptions.InvalidTokenException;
+import br.com.kuntzedev.moneymaster.services.exceptions.ResourceAlreadyExistsException;
 import br.com.kuntzedev.moneymaster.services.exceptions.ResourceNotFoundException;
 import br.com.kuntzedev.moneymaster.services.exceptions.UnauthroziedUserException;
 import br.com.kuntzedev.moneymaster.services.exceptions.UnprocessableRequestException;
@@ -94,19 +96,25 @@ public class UserService implements UserDetailsService {
 	}
 	
 	@Transactional
-	public UserBasicDTO insert(UserInsertDTO dto) {
+	public UserBasicDTO register(UserInsertDTO dto) {
 		if(dto != null) {
-			User user = new User();
-			
-			dtoToEntity(user, dto);
-			user.setPassword(passwordEncoder.encode(dto.getPassword()));
-			user = userRepository.save(user);
-			
-			Vault vault = initializeEmptyVault();
-			vault.setUser(user);
-			vaultService.insert(vault);
-			
-			return new UserBasicDTO(user);
+			User opt = userRepository.findByEmail(dto.getEmail());
+			if(opt == null) {
+				User user = new User();
+				
+				dtoToEntityRegistration(user, dto);
+				user.setRegistrationCompleted(false);
+				user.setPassword(passwordEncoder.encode(dto.getPassword()));
+				user = userRepository.save(user);
+				
+				Vault vault = initializeEmptyVault();
+				vault.setUser(user);
+				vaultService.insert(vault);
+				
+				return new UserBasicDTO(user);
+			} else {
+				throw new ResourceAlreadyExistsException("Error! This user already exists!");
+			}
 		} else {
 			throw new UnprocessableRequestException(NULL_PARAM);
 		}
@@ -266,6 +274,25 @@ public class UserService implements UserDetailsService {
 	private boolean validateOldPassword(User user, String oldPassword) {
 		return passwordEncoder.matches(oldPassword, user.getPassword());
 	}
+	
+	private void dtoToEntityRegistration(User user, UserSimpleRegisterDTO dto) {
+		user.setName(dto.getName().toUpperCase());
+		user.setEmail(dto.getEmail());
+		user.setIdNumber(dto.getIdNumber());
+		user.setIdType(dto.getIdType());
+		user.setPhoneNumber(dto.getPhoneNumber());
+		
+		user.getRoles().clear();
+		dto.getRoles().forEach(role -> {
+			Role r = roleRepository.getReferenceById(role.getId());
+			user.getRoles().add(r);
+		});
+		
+		if(dto.getVault() != null) {
+			Vault vault = vaultService.findReferenceById(dto.getVault().getId());
+			user.setVault(vault);
+		}
+	}
 
 	private void dtoToEntity(User user, UserDTO dto) {
 		user.setName(dto.getName().toUpperCase());
@@ -275,6 +302,7 @@ public class UserService implements UserDetailsService {
 		user.setIdNumber(dto.getIdNumber());
 		user.setIdType(dto.getIdType());
 		user.setPhoneNumber(dto.getPhoneNumber());
+		user.setRegistrationCompleted(dto.isRegistrationCompleted());
 		
 		Address ads = new Address();
 		ads.setAdditionalDetails(dto.getAddress().getAdditionalDetails());

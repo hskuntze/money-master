@@ -2,7 +2,7 @@ package br.com.kuntzedev.moneymaster.dtos;
 
 import br.com.kuntzedev.moneymaster.entities.User;
 
-public class UserInsertDTO extends UserDTO {
+public class UserInsertDTO extends UserSimpleRegisterDTO {
 	private static final long serialVersionUID = 5734701072206258380L;
 
 	private String password;
