@@ -70,7 +70,7 @@ public class TotalExpenseByMonthService {
 	public Page<TotalExpenseByMonthDTO> findByAuthenticatedUser(Pageable pageable, boolean sortExpenses,
 			String sortExpenseAttribute) {
 		User user = authenticationService.authenticated();
-		Page<TotalExpenseByMonth> page = tebmRepository.findByUser(user.getId(), pageable);
+		Page<TotalExpenseByMonth> page = tebmRepository.findByUser(pageable, user.getId());
 
 		if (sortExpenses) {
 			switch (sortExpenseAttribute) {
