@@ -1,7 +1,7 @@
 INSERT INTO tb_role (authority) VALUES ('ROLE_ADMIN');
 INSERT INTO tb_role (authority) VALUES ('ROLE_USER');
 
-INSERT INTO tb_user (name, email, password, phone_number, id_number, id_type, birth, enabled, gender, address_line, number, district, city, state, zip_code, country, additional_details, address_type) VALUES ('Hassan Kuntze Rodrigues da Cunha', 'hskuntze@gmail.com', '$2a$10$eACCYoNOHEqXve8aIWT8Nu3PkMXWBaOxJ9aORUYzfMQCbVBIhZ8tG', '61992515369', 1901942198, 1, '1999-03-03', true, 1, 'SQS 411 Bloco F', '212', 'Asa Sul', 'Brasília', 'Distrito Federal', '70277060', 'Brasil', null, 1);
+INSERT INTO tb_user (name, email, password, phone_number, id_number, id_type, birth, enabled, gender, address_line, number, district, city, state, zip_code, country, additional_details, address_type, registration_completed) VALUES ('Hassan Kuntze Rodrigues da Cunha', 'hskuntze@gmail.com', '$2a$10$eACCYoNOHEqXve8aIWT8Nu3PkMXWBaOxJ9aORUYzfMQCbVBIhZ8tG', '61992515369', 1901942198, 1, '1999-03-03', true, 1, 'SQS 411 Bloco F', '212', 'Asa Sul', 'Brasília', 'Distrito Federal', '70277060', 'Brasil', null, 1, true);
 
 INSERT INTO tb_vault (savings, on_wallet, allowed_to_spend, user_id) VALUES (0.0, 0.0, 0.0, 1);
 
@@ -33,6 +33,9 @@ INSERT INTO tb_item_price (date, price, item_history_id) VALUES ('2023-11-02', 8
 INSERT INTO tb_expense_track (monthly_income, anual_income, extra_income, day_of_salary_payment, fluctuation_by_month, user_id) VALUES (3200.0, 38400.0, 0.0, 5, 0.0, 1);
 
 INSERT INTO tb_total_expense_by_month (date, total_expended, remaining_amount, expense_track_id) VALUES ('2023-10-01', 2000.0, 1200.0, 1);
+INSERT INTO tb_total_expense_by_month (date, total_expended, remaining_amount, expense_track_id) VALUES ('2023-11-01', 2000.0, 1200.0, 1);
+INSERT INTO tb_total_expense_by_month (date, total_expended, remaining_amount, expense_track_id) VALUES ('2023-12-01', 2000.0, 1200.0, 1);
+INSERT INTO tb_total_expense_by_month (date, total_expended, remaining_amount, expense_track_id) VALUES ('2024-01-01', 2000.0, 1200.0, 1);
 
 INSERT INTO tb_fixed_expense (title, price, day_of_charge, begin_of_expense, end_of_expense) VALUES ('Netflix', 400.0, 4, '2022-06-24', '2025-06-24');
 INSERT INTO tb_fixed_expense (title, price, day_of_charge, begin_of_expense, end_of_expense) VALUES ('Outra coisa', 500.0, 10, '2022-06-24', '2023-10-01');

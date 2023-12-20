@@ -24,8 +24,6 @@ public interface TotalExpenseByMonthRepository extends JpaRepository<TotalExpens
 	Optional<TotalExpenseByMonth> findByMonth(Long userId, int month);
 	
 	@Query(value = "SELECT tbem FROM TotalExpenseByMonth tbem "
-			+ "WHERE tbem.expenseTrack.user.id = :userId",
-			countQuery = "SELECT tbem FROM TotalExpenseByMonth tbem "
-					+ "	WHERE tbem.expenseTrack.user.id = :userId")
-	Page<TotalExpenseByMonth> findByUser(Long userId, Pageable pageable);
+			+ "WHERE tbem.expenseTrack.user.id = :userId")
+	Page<TotalExpenseByMonth> findByUser(Pageable pageable, Long userId);
 }
