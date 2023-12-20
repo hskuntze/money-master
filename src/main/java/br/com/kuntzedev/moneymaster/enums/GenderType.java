@@ -7,7 +7,8 @@ public enum GenderType {
 	TRANSGENDER("Transgênero"),
 	GENDERFLUID("Gênero Fluido"),
 	AGENDER("Agênero"),
-	OTHER("Outro");
+	OTHER("Outro"),
+	UNDEFINED("Não definido");
 	
 	private final String desc;
 	

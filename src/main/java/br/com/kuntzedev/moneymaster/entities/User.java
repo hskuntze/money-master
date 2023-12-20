@@ -45,6 +45,7 @@ public class User implements Serializable, UserDetails {
 	private Integer idType;
 	private LocalDate birth;
 	private boolean enabled;
+	private boolean registrationCompleted;
 	private GenderType gender;
 	
 	@Embedded
@@ -178,6 +179,14 @@ public class User implements Serializable, UserDetails {
 
 	public void setExpenseTrack(ExpenseTrack expenseTrack) {
 		this.expenseTrack = expenseTrack;
+	}
+
+	public boolean isRegistrationCompleted() {
+		return registrationCompleted;
+	}
+
+	public void setRegistrationCompleted(boolean registrationCompleted) {
+		this.registrationCompleted = registrationCompleted;
 	}
 
 	@Override

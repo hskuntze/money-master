@@ -313,6 +313,15 @@ public class TotalExpenseByMonthService {
 			LocalDate today = LocalDate.now();
 
 			Long userId = authenticationService.authenticated().getId();
+			
+			/**
+			 * Se thisMonth == 1:	
+			 * 	- Significa que é janeiro, 13 - 1 = 12 -> dezembro
+			 */
+			if(thisMonth == 1) {
+				thisMonth = 13;
+			}
+			
 			TotalExpenseByMonth lastMonth = tebmRepository.findByMonth(userId, thisMonth - 1)
 					.orElseThrow(() -> new ResourceNotFoundException(RNFE));
 
