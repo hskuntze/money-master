@@ -93,8 +93,10 @@ public class TotalExpenseByMonthService {
 
 	@Transactional
 	public Page<FixedExpenseDTO> findAllFixedExpenses(Pageable pageable) {
-		Long userId = authenticationService.authenticated().getId();
-		Page<FixedExpense> page = fixedExpensesRepository.findAllByUserId(userId, pageable);
+		User user = authenticationService.authenticated();
+		List<TotalExpenseByMonth> tebms = user.getExpenseTrack().getTotalExpenseByMonths();
+		Long lastTebm = tebms.get(tebms.size() - 1).getId();
+		Page<FixedExpense> page = fixedExpensesRepository.findAllByUserId(user.getId(), lastTebm, pageable);
 		return page.map(FixedExpenseDTO::new);
 	}
 

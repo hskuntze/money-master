@@ -1,5 +1,6 @@
 package br.com.kuntzedev.moneymaster.controllers;
 
+import java.math.BigDecimal;
 import java.net.URI;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -69,11 +70,16 @@ public class ExpenseTrackController {
 	}
 	
 	/**
-	 * -------------- POSTS --------------
+	 * -------------- PUTS --------------
 	 */
 	
 	@PutMapping(value = "/update")
 	public ResponseEntity<ExpenseTrackDTO> updateExpenseTrack(@RequestBody ExpenseTrackDTO dto) {
 		return ResponseEntity.ok().body(expenseTrackService.updateExpenseTrack(dto));
+	}
+	
+	@PutMapping(value = "/update/salaryIncome")
+	public ResponseEntity<ExpenseTrackDTO> updateSalaryIncome(@RequestParam("value") BigDecimal value) {
+		return ResponseEntity.ok().body(expenseTrackService.updateSalaryIncome(value));
 	}
 }
