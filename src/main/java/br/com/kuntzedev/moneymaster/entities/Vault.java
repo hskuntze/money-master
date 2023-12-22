@@ -56,7 +56,17 @@ public class Vault implements Serializable {
 	}
 
 	public BigDecimal getAllowedToSpend() {
-		return allowedToSpend;
+		if(allowedToSpend.signum() != 0) {
+			BigDecimal value = allowedToSpend;
+			ExpenseTrack et = user.getExpenseTrack();
+			TotalExpenseByMonth lastTebm = et.getTotalExpenseByMonths().get(et.getTotalExpenseByMonths().size() - 1);
+			
+			BigDecimal variableExpensesSum = lastTebm.getVariableExpenses().stream().map(ve -> ve.getPrice()).reduce(BigDecimal.ZERO, BigDecimal::add);
+			
+			return value.subtract(variableExpensesSum);
+		} else {
+			return allowedToSpend;
+		}
 	}
 
 	public void setAllowedToSpend(BigDecimal allowedToSpend) {
@@ -73,9 +83,6 @@ public class Vault implements Serializable {
 		return this.getOnWallet();
 	}
 	
-	/**
-	 * Apenas "onWallet" poderá conter valores negativos.
-	 */
 	public BigDecimal reduceWalletValue(BigDecimal value) {
 		BigDecimal newValue = this.onWallet.subtract(value);
 		this.setOnWallet(newValue);

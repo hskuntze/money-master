@@ -26,12 +26,8 @@ public interface FixedExpensesRepository extends JpaRepository<FixedExpense, Lon
 			+ "LEFT JOIN tb_total_expense_by_month ttebm ON tfebm.tbem_id = ttebm.id "
 			+ "LEFT JOIN tb_expense_track tet ON ttebm.expense_track_id = tet.id "
 			+ "LEFT JOIN tb_user tu ON tet.user_id = tu.id "
-			+ "WHERE tu.id = :userId", countQuery = "SELECT DISTINCT count(1) FROM tb_fixed_expense tfe "
-					+ "LEFT JOIN tb_fixed_expenses_by_month tfebm ON tfe.id = tfebm.fixed_expense_id "
-					+ "LEFT JOIN tb_total_expense_by_month ttebm ON tfebm.tbem_id = ttebm.id "
-					+ "LEFT JOIN tb_expense_track tet ON ttebm.expense_track_id = tet.id "
-					+ "LEFT JOIN tb_user tu ON tet.user_id = tu.id WHERE tu.id = :userId")
-	Page<FixedExpense> findAllByUserId(Long userId, Pageable pageable);
+			+ "WHERE tu.id = :userId AND tfebm.tbem_id = :tebmId")
+	Page<FixedExpense> findAllByUserId(Long userId, Long tebmId, Pageable pageable);
 	
 	@Modifying
 	@Query(nativeQuery = true, value = "DELETE FROM tb_fixed_expenses_by_month tb WHERE tb.fixed_expense_id = :id")

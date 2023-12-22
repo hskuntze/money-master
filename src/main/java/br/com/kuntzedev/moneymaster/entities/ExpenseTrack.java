@@ -59,7 +59,7 @@ public class ExpenseTrack implements Serializable {
 	}
 
 	public BigDecimal getAnualIncome() {
-		return anualIncome;
+		return monthlyIncome.multiply(BigDecimal.valueOf(12)).add(extraIncome);
 	}
 
 	public void setAnualIncome() {

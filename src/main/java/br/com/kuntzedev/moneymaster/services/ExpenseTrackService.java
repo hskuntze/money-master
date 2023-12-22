@@ -1,5 +1,6 @@
 package br.com.kuntzedev.moneymaster.services;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -132,6 +133,24 @@ public class ExpenseTrackService {
 			et.setMonthlyIncome(dto.getMonthlyIncome());
 			et.setAnualIncome();
 			et.setFluctuationByMonth(dto.getFluctuationByMonth());
+			
+			et = expenseTrackRepository.save(et);
+			
+			return new ExpenseTrackDTO(et);
+		} else {
+			throw new ResourceNotFoundException("Something is wrong here. You must already have an expense track in order to update it.");
+		}
+	}
+	
+	@Transactional
+	public ExpenseTrackDTO updateSalaryIncome(BigDecimal value) {
+		boolean exists = verifyExistence();
+		
+		if(exists) {
+			Long id = authenticationService.authenticated().getExpenseTrack().getId();
+			ExpenseTrack et = expenseTrackRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException(RNFE));
+			
+			et.setMonthlyIncome(value);
 			
 			et = expenseTrackRepository.save(et);
 			
