@@ -1,5 +1,7 @@
 package br.com.kuntzedev.moneymaster.controllers;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -15,8 +17,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import br.com.kuntzedev.moneymaster.dtos.FixedExpenseDTO;
+import br.com.kuntzedev.moneymaster.dtos.TotalExpenseByMonthBasicDTO;
 import br.com.kuntzedev.moneymaster.dtos.TotalExpenseByMonthDTO;
 import br.com.kuntzedev.moneymaster.dtos.VariableExpenseDTO;
+import br.com.kuntzedev.moneymaster.dtos.VariableExpenseSumByDateDTO;
+import br.com.kuntzedev.moneymaster.dtos.VariableExpenseSumByTitleDTO;
 import br.com.kuntzedev.moneymaster.services.TotalExpenseByMonthService;
 
 @RestController
@@ -54,19 +59,39 @@ public class TotalExpenseByMonthController {
 		return ResponseEntity.ok().body(tebmService.findAllFixedExpenses(pageable));
 	}
 	
+	@GetMapping(value = "/findAll/fixedExpenses/validdate")
+	public ResponseEntity<Page<FixedExpenseDTO>> findAllFixedExpensesWithValidDate(Pageable pageable) {
+		return ResponseEntity.ok().body(tebmService.findAllFixedExpensesWithValidDate(pageable));
+	}
+	
+	@GetMapping(value = "/sumByTitle/{monthId}")
+	public ResponseEntity<List<VariableExpenseSumByTitleDTO>> sumByTitle(@PathVariable Long monthId) {
+		return ResponseEntity.ok().body(tebmService.sumByTitle(monthId));
+	}
+	
+	@GetMapping(value = "/sumByDate/{monthId}")
+	public ResponseEntity<List<VariableExpenseSumByDateDTO>> sumByDate(@PathVariable Long monthId) {
+		return ResponseEntity.ok().body(tebmService.sumByDateOfCharge(monthId));
+	}
+	
+	@GetMapping(value = "/basicDataFromAll")
+	public ResponseEntity<List<TotalExpenseByMonthBasicDTO>> getBasicData() {
+		return ResponseEntity.ok().body(tebmService.getBasicData());
+	}
+	
 	/**
 	 * -------------- POSTS --------------
 	 */
 	
 	@PostMapping(value = "/register/variableExpense")
-	public ResponseEntity<Void> insertVariableExpense(@RequestParam("month") int month, @RequestBody VariableExpenseDTO dto) {
-		tebmService.insertVariableExpense(month, dto);
+	public ResponseEntity<Void> insertVariableExpense(@RequestParam("year") int year, @RequestParam("month") int month, @RequestBody VariableExpenseDTO dto) {
+		tebmService.insertVariableExpense(year, month, dto);
 		return ResponseEntity.ok().build();
 	}
 	
 	@PostMapping(value = "/register/variableExpenses")
-	public ResponseEntity<Void> insertVariableExpenses(@RequestParam("month") int month, @RequestBody VariableExpenseDTO... dto) {
-		tebmService.insertVariableExpense(month, dto);
+	public ResponseEntity<Void> insertVariableExpenses(@RequestParam("year") int year, @RequestParam("month") int month, @RequestBody VariableExpenseDTO... dto) {
+		tebmService.insertVariableExpense(year, month, dto);
 		return ResponseEntity.ok().build();
 	}
 	

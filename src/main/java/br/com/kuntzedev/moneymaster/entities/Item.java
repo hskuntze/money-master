@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Objects;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -39,7 +40,7 @@ public class Item implements Serializable {
 	@JoinColumn(name = "wishlist_id")
 	private Wishlist wishlist;
 	
-	@OneToOne(mappedBy = "item", fetch = FetchType.LAZY)
+	@OneToOne(mappedBy = "item", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
 	private ItemHistory itemHistory;
 	
 	public Item() {

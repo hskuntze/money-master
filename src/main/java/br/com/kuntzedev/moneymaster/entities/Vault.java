@@ -16,18 +16,18 @@ import javax.persistence.Table;
 @Table(name = "tb_vault")
 public class Vault implements Serializable {
 	private static final long serialVersionUID = -4472915620785600370L;
-	
+
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 	private BigDecimal savings;
 	private BigDecimal onWallet;
 	private BigDecimal allowedToSpend;
-	
+
 	@OneToOne
 	@JoinColumn(name = "user_id")
 	private User user;
-	
+
 	public Vault() {
 	}
 
@@ -56,23 +56,13 @@ public class Vault implements Serializable {
 	}
 
 	public BigDecimal getAllowedToSpend() {
-		if(allowedToSpend.signum() != 0) {
-			BigDecimal value = allowedToSpend;
-			ExpenseTrack et = user.getExpenseTrack();
-			TotalExpenseByMonth lastTebm = et.getTotalExpenseByMonths().get(et.getTotalExpenseByMonths().size() - 1);
-			
-			BigDecimal variableExpensesSum = lastTebm.getVariableExpenses().stream().map(ve -> ve.getPrice()).reduce(BigDecimal.ZERO, BigDecimal::add);
-			
-			return value.subtract(variableExpensesSum);
-		} else {
-			return allowedToSpend;
-		}
+		return allowedToSpend;
 	}
 
 	public void setAllowedToSpend(BigDecimal allowedToSpend) {
 		this.allowedToSpend = allowedToSpend;
 	}
-	
+
 	public void setUser(User user) {
 		this.user = user;
 	}
@@ -82,43 +72,43 @@ public class Vault implements Serializable {
 		this.setOnWallet(newValue);
 		return this.getOnWallet();
 	}
-	
+
 	public BigDecimal reduceWalletValue(BigDecimal value) {
 		BigDecimal newValue = this.onWallet.subtract(value);
 		this.setOnWallet(newValue);
 		return this.getOnWallet();
 	}
-	
+
 	public BigDecimal increaseSavingsValue(BigDecimal value) {
 		BigDecimal newValue = this.savings.add(value);
 		this.setSavings(newValue);
 		return this.getSavings();
 	}
-	
+
 	public BigDecimal reduceSavingsValue(BigDecimal value) {
 		BigDecimal newValue = this.savings.subtract(value);
-		
-		if(newValue.signum() <= 0) {
+
+		if (newValue.signum() <= 0) {
 			newValue = BigDecimal.ZERO;
 		}
-		
+
 		this.setSavings(newValue);
 		return this.getSavings();
 	}
-	
+
 	public BigDecimal increaseAllowedToSpendValue(BigDecimal value) {
 		BigDecimal newValue = this.allowedToSpend.add(value);
 		this.setAllowedToSpend(newValue);
 		return this.getAllowedToSpend();
 	}
-	
+
 	public BigDecimal reduceAllowedToSpendValue(BigDecimal value) {
 		BigDecimal newValue = this.allowedToSpend.subtract(value);
-		
-		if(newValue.signum() <= 0) {
+
+		if (newValue.signum() <= 0) {
 			newValue = BigDecimal.ZERO;
 		}
-		
+
 		this.setAllowedToSpend(newValue);
 		return this.getAllowedToSpend();
 	}

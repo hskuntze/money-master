@@ -13,8 +13,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import br.com.kuntzedev.moneymaster.dtos.FixedExpenseDTO;
+import br.com.kuntzedev.moneymaster.dtos.TotalExpenseByMonthBasicDTO;
 import br.com.kuntzedev.moneymaster.dtos.TotalExpenseByMonthDTO;
 import br.com.kuntzedev.moneymaster.dtos.VariableExpenseDTO;
+import br.com.kuntzedev.moneymaster.dtos.VariableExpenseSumByDateDTO;
+import br.com.kuntzedev.moneymaster.dtos.VariableExpenseSumByTitleDTO;
 import br.com.kuntzedev.moneymaster.entities.ExpenseTrack;
 import br.com.kuntzedev.moneymaster.entities.FixedExpense;
 import br.com.kuntzedev.moneymaster.entities.TotalExpenseByMonth;
@@ -99,6 +102,13 @@ public class TotalExpenseByMonthService {
 		Page<FixedExpense> page = fixedExpensesRepository.findAllByUserId(user.getId(), lastTebm, pageable);
 		return page.map(FixedExpenseDTO::new);
 	}
+	
+	@Transactional
+	public Page<FixedExpenseDTO> findAllFixedExpensesWithValidDate(Pageable pageable) {
+		User user = authenticationService.authenticated();
+		Page<FixedExpense> page = fixedExpensesRepository.findAllByUserIdWithValidDate(user.getId(), pageable);
+		return page.map(FixedExpenseDTO::new);
+	}
 
 	/**
 	 * Verifica se um TotalExpenseByMonth existe no mês atual
@@ -165,9 +175,9 @@ public class TotalExpenseByMonthService {
 	 * @param dto
 	 */
 	@Transactional
-	public void insertVariableExpense(int month, VariableExpenseDTO dto) {
+	public void insertVariableExpense(int year, int month, VariableExpenseDTO dto) {
 		Long id = authenticationService.authenticated().getId();
-		TotalExpenseByMonth tebm = tebmRepository.findByMonth(id, month)
+		TotalExpenseByMonth tebm = tebmRepository.findByMonth(id, month, year)
 				.orElseThrow(() -> new ResourceNotFoundException(RNFE));
 
 		VariableExpense ve = new VariableExpense();
@@ -186,9 +196,9 @@ public class TotalExpenseByMonthService {
 	 * @param dto
 	 */
 	@Transactional
-	public void insertVariableExpense(int month, VariableExpenseDTO... dtos) {
+	public void insertVariableExpense(int year, int month, VariableExpenseDTO... dtos) {
 		Long id = authenticationService.authenticated().getId();
-		TotalExpenseByMonth tebm = tebmRepository.findByMonth(id, month)
+		TotalExpenseByMonth tebm = tebmRepository.findByMonth(id, month, year)
 				.orElseThrow(() -> new ResourceNotFoundException(RNFE));
 
 		for (VariableExpenseDTO v : dtos) {
@@ -211,9 +221,10 @@ public class TotalExpenseByMonthService {
 	@Transactional
 	public void insertFixedExpense(FixedExpenseDTO dto) {
 		int month = LocalDate.now().getMonthValue();
+		int year = LocalDate.now().getYear();
 		Long id = authenticationService.authenticated().getId();
 
-		TotalExpenseByMonth tebm = tebmRepository.findByMonth(id, month)
+		TotalExpenseByMonth tebm = tebmRepository.findByMonth(id, month, year)
 				.orElseThrow(() -> new ResourceNotFoundException(RNFE));
 		Optional<List<FixedExpense>> opt = fixedExpensesRepository.findManyByTitle(dto.getTitle());
 
@@ -244,9 +255,10 @@ public class TotalExpenseByMonthService {
 	@Transactional
 	public void insertFixedExpense(FixedExpenseDTO... dtos) {
 		int month = LocalDate.now().getMonthValue();
+		int year = LocalDate.now().getYear();
 		Long id = authenticationService.authenticated().getId();
 
-		TotalExpenseByMonth tebm = tebmRepository.findByMonth(id, month)
+		TotalExpenseByMonth tebm = tebmRepository.findByMonth(id, month, year)
 				.orElseThrow(() -> new ResourceNotFoundException(RNFE));
 		for (FixedExpenseDTO dto : dtos) {
 			Optional<List<FixedExpense>> opt = fixedExpensesRepository.findManyByTitle(dto.getTitle());
@@ -313,6 +325,7 @@ public class TotalExpenseByMonthService {
 		if (!exists) {
 			int thisMonth = LocalDate.now().getMonthValue();
 			LocalDate today = LocalDate.now();
+			int year = LocalDate.now().getYear();
 
 			Long userId = authenticationService.authenticated().getId();
 			
@@ -324,7 +337,7 @@ public class TotalExpenseByMonthService {
 				thisMonth = 13;
 			}
 			
-			TotalExpenseByMonth lastMonth = tebmRepository.findByMonth(userId, thisMonth - 1)
+			TotalExpenseByMonth lastMonth = tebmRepository.findByMonth(userId, thisMonth - 1, year)
 					.orElseThrow(() -> new ResourceNotFoundException(RNFE));
 
 			BigDecimal totalExpendedByFixedExpenses = BigDecimal.ZERO;
@@ -351,6 +364,30 @@ public class TotalExpenseByMonthService {
 			throw new ResourceAlreadyExistsException(
 					"You can't create a monthly expense control for this specific month because one already exists!");
 		}
+	}
+	
+	/**
+	 * Função responsável por realizar a soma de todos os gastos variáveis pelo nome
+	 * 
+	 * @param monthId
+	 * @return
+	 */
+	public List<VariableExpenseSumByTitleDTO> sumByTitle(Long monthId) {
+		return variableExpensesRepository.sumByTitle(monthId);
+	}
+	
+	/**
+	 * Função responsável por realizar a soma de todos os gastos variáveis pela data de cobrança
+	 * 
+	 * @param monthId
+	 * @return
+	 */
+	public List<VariableExpenseSumByDateDTO> sumByDateOfCharge(Long monthId) {
+		return variableExpensesRepository.sumByDateOfCharge(monthId);
+	}
+	
+	public List<TotalExpenseByMonthBasicDTO> getBasicData() {
+		return tebmRepository.getBasicData();
 	}
 
 	/**
