@@ -4,7 +4,8 @@ public enum SourcePlatform {
 	ALI_EXPRESS("Ali Express"),
 	AMAZON("Amazon"),
 	MERCADO_LIVRE("Mercado Livre"),
-	SHEIN("Shein");
+	SHEIN("Shein"),
+	MAGAZINE_LUIZA("Magazine Luiza");
 	
 	private final String desc;
 	
