@@ -19,6 +19,7 @@ import br.com.kuntzedev.moneymaster.dtos.ScrapingItemDTO;
 import br.com.kuntzedev.moneymaster.services.ItemService;
 import br.com.kuntzedev.moneymaster.services.scraping.AliExpressScrapingService;
 import br.com.kuntzedev.moneymaster.services.scraping.AmazonScrapingService;
+import br.com.kuntzedev.moneymaster.services.scraping.KabumScrapingService;
 import br.com.kuntzedev.moneymaster.services.scraping.MagazineLuizaScrapingService;
 import br.com.kuntzedev.moneymaster.services.scraping.MercadoLivreScrapingService;
 import br.com.kuntzedev.moneymaster.services.scraping.SheinScrapingService;
@@ -41,6 +42,9 @@ public class ScrapingController {
 	
 	@Autowired
 	private MagazineLuizaScrapingService magazineLuizaScrapingService;
+	
+	@Autowired
+	private KabumScrapingService kabumScrapingService;
 	
 	@Autowired
 	private ItemService itemService;
@@ -95,6 +99,16 @@ public class ScrapingController {
 			@RequestParam(defaultValue = "0") int page,
 			@RequestParam(defaultValue = "10") int size){
 		return ResponseEntity.ok().body(magazineLuizaScrapingService.searchForProduct(product, page, size));
+	}
+	
+	/**
+	 * 				K A B U M
+	 */
+	@GetMapping(value = "/kabum/search")
+	public ResponseEntity<Page<ScrapingItemDTO>> searchForKabumProduct(@RequestParam String product,
+			@RequestParam(defaultValue = "0") int page,
+			@RequestParam(defaultValue = "10") int size) {
+		return ResponseEntity.ok().body(kabumScrapingService.searchForProduct(product, page, size));
 	}
 	
 	/**

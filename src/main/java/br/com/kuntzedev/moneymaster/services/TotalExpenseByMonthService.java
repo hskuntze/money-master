@@ -337,25 +337,26 @@ public class TotalExpenseByMonthService {
 				thisMonth = 13;
 			}
 			
-			TotalExpenseByMonth lastMonth = tebmRepository.findByMonth(userId, thisMonth - 1, year)
-					.orElseThrow(() -> new ResourceNotFoundException(RNFE));
-
-			BigDecimal totalExpendedByFixedExpenses = BigDecimal.ZERO;
+			TotalExpenseByMonth lastMonth = tebmRepository.findByMonth(userId, thisMonth - 1, year).orElse(null);
 
 			TotalExpenseByMonth forThisMonth = new TotalExpenseByMonth();
 
 			forThisMonth.setDate(today);
 			forThisMonth.setRemainingAmount(BigDecimal.ZERO);
 			forThisMonth.setExpenseTrack(et);
+			
+			if(lastMonth != null) {
+				BigDecimal totalExpendedByFixedExpenses = BigDecimal.ZERO;
 
-			for (FixedExpense fe : lastMonth.getFixedExpenses()) {
-				if (fe.getBeginOfExpense().isBefore(today) && fe.getEndOfExpense().isAfter(today)) {
-					forThisMonth.getFixedExpenses().add(fe);
-					totalExpendedByFixedExpenses = totalExpendedByFixedExpenses.add(fe.getPrice());
+				for (FixedExpense fe : lastMonth.getFixedExpenses()) {
+					if (fe.getBeginOfExpense().isBefore(today) && fe.getEndOfExpense().isAfter(today)) {
+						forThisMonth.getFixedExpenses().add(fe);
+						totalExpendedByFixedExpenses = totalExpendedByFixedExpenses.add(fe.getPrice());
+					}
 				}
-			}
 
-			forThisMonth.setTotalExpended(totalExpendedByFixedExpenses);
+				forThisMonth.setTotalExpended(totalExpendedByFixedExpenses);
+			}
 
 			tebmRepository.save(forThisMonth);
 
