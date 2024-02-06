@@ -24,6 +24,9 @@ public class ScrapingMediatorService {
 	
 	@Autowired
 	private MagazineLuizaScrapingService magazineLuizaScrapingService;
+	
+	@Autowired
+	private KabumScrapingService kabumScrapingService;
 
 	public ScrapingItemDTO updateItemBasedOnLink(Item item, SourcePlatform sourcePlatform) {
 		switch(sourcePlatform) {
@@ -37,6 +40,8 @@ public class ScrapingMediatorService {
 				return sheinScrapingService.updateItemBasedOnLink(item);
 			case MAGAZINE_LUIZA:
 				return magazineLuizaScrapingService.updateItemBasedOnLink(item);
+			case KABUM: 
+				return kabumScrapingService.updateItemBasedOnLink(item);
 			default:
 				return new ScrapingItemDTO();
 		}
