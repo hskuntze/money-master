@@ -169,11 +169,7 @@ public class ItemService {
 	}
 	
 	public void deleteAll(List<Item> items) {
-		if(!items.isEmpty()) {
-			itemRepository.deleteAll(items);
-		} else {
-			throw new UnprocessableRequestException(NULL_PARAM);
-		}
+		itemRepository.deleteAll(items);
 	}
 
 	private void dtoToEntity(Item entity, ItemDTO dto) {

@@ -363,7 +363,7 @@ public class TotalExpenseByMonthService {
 			return forThisMonth;
 		} else {
 			throw new ResourceAlreadyExistsException(
-					"You can't create a monthly expense control for this specific month because one already exists!");
+					"Your total expense for this month already exists.");
 		}
 	}
 	
