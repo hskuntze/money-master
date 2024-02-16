@@ -188,13 +188,9 @@ public class WishlistService {
 	}
 	
 	public void deleteById(Long id) {
-		if(id != null) {
-			Wishlist entity = wishlistRepository.findWishlistWithItems(id).orElseThrow(() -> new ResourceNotFoundException("Wishlist with ID + " + id + RNFE2));
-			itemService.deleteAll(entity.getItems());
-			wishlistRepository.deleteById(id);
-		} else {
-			throw new UnprocessableRequestException(NULL_PARAM);
-		}
+		Wishlist entity = wishlistRepository.findWishlistWithItems(id).orElseThrow(() -> new ResourceNotFoundException("Wishlist with ID + " + id + RNFE2));
+		itemService.deleteAll(entity.getItems());
+		wishlistRepository.deleteById(id);
 	}
 
 	private void dtoToEntity(Wishlist entity, WishlistDTO dto) {

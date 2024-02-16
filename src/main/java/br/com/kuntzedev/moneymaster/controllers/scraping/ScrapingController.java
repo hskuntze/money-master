@@ -1,6 +1,7 @@
 package br.com.kuntzedev.moneymaster.controllers.scraping;
 
 import java.net.URI;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -16,12 +17,14 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import br.com.kuntzedev.moneymaster.dtos.ItemDTO;
 import br.com.kuntzedev.moneymaster.dtos.ScrapingItemDTO;
+import br.com.kuntzedev.moneymaster.enums.SourcePlatform;
 import br.com.kuntzedev.moneymaster.services.ItemService;
 import br.com.kuntzedev.moneymaster.services.scraping.AliExpressScrapingService;
 import br.com.kuntzedev.moneymaster.services.scraping.AmazonScrapingService;
 import br.com.kuntzedev.moneymaster.services.scraping.KabumScrapingService;
 import br.com.kuntzedev.moneymaster.services.scraping.MagazineLuizaScrapingService;
 import br.com.kuntzedev.moneymaster.services.scraping.MercadoLivreScrapingService;
+import br.com.kuntzedev.moneymaster.services.scraping.ScrapingMediatorService;
 import br.com.kuntzedev.moneymaster.services.scraping.SheinScrapingService;
 
 @RestController
@@ -47,7 +50,21 @@ public class ScrapingController {
 	private KabumScrapingService kabumScrapingService;
 	
 	@Autowired
+	private ScrapingMediatorService mediatorService;
+	
+	@Autowired
 	private ItemService itemService;
+	
+	/**
+	 * 				M A N Y   I T E M S
+	 */
+	@GetMapping(value = "/search")
+	public ResponseEntity<List<ScrapingItemDTO>> searchForProductsOnManyPlatforms(@RequestParam(name = "item") String product,
+			@RequestParam(defaultValue = "0") int page,
+			@RequestParam(defaultValue = "999") int size,
+			@RequestParam(name = "sources") SourcePlatform... platforms) {
+		return ResponseEntity.ok().body(mediatorService.searchForProductOnManyPlatforms(product, size, page, platforms));
+	}
 	
 	/**
 	 * 				A M A Z O N

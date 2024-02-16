@@ -63,7 +63,10 @@ public class AliExpressScrapingService {
 					ScrapingItemDTO item = new ScrapingItemDTO();
 					
 					item.setName(getProductTitle(document, j));
-					item.setImage(getProductImage(document, j));
+					
+					int index = getProductImage(document, j).indexOf("_");
+					item.setImage("https://" + getProductImage(document, j).substring(0, index));
+					
 					item.setLink("https://" + getProductLink(document, j));
 					item.setPrice(getProductPrice(document, j));
 					item.setSourcePlatform(SourcePlatform.ALI_EXPRESS);
