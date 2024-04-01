@@ -190,6 +190,9 @@ public class WishlistService {
 	public void deleteById(Long id) {
 		Wishlist entity = wishlistRepository.findWishlistWithItems(id).orElseThrow(() -> new ResourceNotFoundException("Wishlist with ID + " + id + RNFE2));
 		itemService.deleteAll(entity.getItems());
+		for(Installment inst : entity.getInstallments()) {
+			installmentRepository.deleteById(inst.getId());
+		}
 		wishlistRepository.deleteById(id);
 	}
 

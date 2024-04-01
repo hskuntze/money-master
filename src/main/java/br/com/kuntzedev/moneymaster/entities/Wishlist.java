@@ -43,7 +43,7 @@ public class Wishlist implements Serializable {
 	@OneToMany(mappedBy = "wishlist", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
 	private List<Item> items = new ArrayList<>();
 	
-	@OneToMany(mappedBy = "wishlist", fetch = FetchType.LAZY)
+	@OneToMany(mappedBy = "wishlist", fetch = FetchType.EAGER)
 	private List<Installment> installments = new ArrayList<>();
 	
 	public Wishlist() {
