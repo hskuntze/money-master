@@ -26,6 +26,9 @@ import br.com.kuntzedev.moneymaster.services.scraping.MagazineLuizaScrapingServi
 import br.com.kuntzedev.moneymaster.services.scraping.MercadoLivreScrapingService;
 import br.com.kuntzedev.moneymaster.services.scraping.ScrapingMediatorService;
 import br.com.kuntzedev.moneymaster.services.scraping.SheinScrapingService;
+import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.DistributionSummary;
+import io.micrometer.core.instrument.MeterRegistry;
 
 @RestController
 @RequestMapping(value = "/scraping")
@@ -54,6 +57,16 @@ public class ScrapingController {
 	
 	@Autowired
 	private ItemService itemService;
+
+	private final MeterRegistry meterRegistry;
+	private final Counter scrapingCounter;
+	
+	public ScrapingController(MeterRegistry meterRegistry) {
+		this.meterRegistry = meterRegistry;
+		
+		this.scrapingCounter = Counter.builder("item_scraping_counter").tag("item_scrapings", "scrapings")
+				.description("The amount of times the scraping service has been used").register(meterRegistry);
+	}
 	
 	/**
 	 * 				M A N Y   I T E M S
@@ -63,6 +76,7 @@ public class ScrapingController {
 			@RequestParam(defaultValue = "0") int page,
 			@RequestParam(defaultValue = "999") int size,
 			@RequestParam(name = "sources") SourcePlatform... platforms) {
+		scrapingCounter.increment(1);
 		return ResponseEntity.ok().body(mediatorService.searchForProductOnManyPlatforms(product, size, page, platforms));
 	}
 	
@@ -75,6 +89,7 @@ public class ScrapingController {
 			@RequestParam(defaultValue = "10") int size,
 			@RequestParam(defaultValue = "false") boolean prime,
 			@RequestParam(defaultValue = "false") boolean freeShiping){
+		scrapingCounter.increment(1);
 		return ResponseEntity.ok().body(amazonScrapingService.searchForProduct(product, page, size, prime, freeShiping));
 	}
 	
@@ -85,6 +100,7 @@ public class ScrapingController {
 	public ResponseEntity<Page<ScrapingItemDTO>> searchForSheinProduct(@RequestParam String product,
 			@RequestParam(defaultValue = "0") int page,
 			@RequestParam(defaultValue = "10") int size){
+		scrapingCounter.increment(1);
 		return ResponseEntity.ok().body(sheinScrapingService.searchForProduct(product, page, size));
 	}
 	
@@ -95,6 +111,7 @@ public class ScrapingController {
 	public ResponseEntity<Page<ScrapingItemDTO>> searchForMercadoLivreProduct(@RequestParam String product,
 			@RequestParam(defaultValue = "0") int page,
 			@RequestParam(defaultValue = "10") int size){
+		scrapingCounter.increment(1);
 		return ResponseEntity.ok().body(mercadoLivreScrapingService.searchForProduct(product, page, size));
 	}
 	
@@ -105,6 +122,7 @@ public class ScrapingController {
 	public ResponseEntity<Page<ScrapingItemDTO>> searchForAliExpressProduct(@RequestParam String product,
 			@RequestParam(defaultValue = "0") int page,
 			@RequestParam(defaultValue = "10") int size){
+		scrapingCounter.increment(1);
 		return ResponseEntity.ok().body(aliExpressScrapingService.searchForProduct(product, page, size));
 	}
 	
@@ -115,6 +133,7 @@ public class ScrapingController {
 	public ResponseEntity<Page<ScrapingItemDTO>> searchForMagazineLuizaProduct(@RequestParam String product,
 			@RequestParam(defaultValue = "0") int page,
 			@RequestParam(defaultValue = "10") int size){
+		scrapingCounter.increment(1);
 		return ResponseEntity.ok().body(magazineLuizaScrapingService.searchForProduct(product, page, size));
 	}
 	
@@ -125,6 +144,7 @@ public class ScrapingController {
 	public ResponseEntity<Page<ScrapingItemDTO>> searchForKabumProduct(@RequestParam String product,
 			@RequestParam(defaultValue = "0") int page,
 			@RequestParam(defaultValue = "10") int size) {
+		scrapingCounter.increment(1);
 		return ResponseEntity.ok().body(kabumScrapingService.searchForProduct(product, page, size));
 	}
 	
@@ -134,6 +154,14 @@ public class ScrapingController {
 	@PostMapping(value = "/register/onWishlist/{id}")
 	public ResponseEntity<ItemDTO> insert(@RequestBody ScrapingItemDTO dto, @PathVariable Long id) {
 		ItemDTO item = itemService.insertScrapingProduct(id, dto);
+		
+		DistributionSummary itemPriceHistogram = DistributionSummary.builder("item_price_histogram")
+		        .tag("item", "price")
+		        .description("Histogram for item prices")
+		        .register(meterRegistry);
+		
+		itemPriceHistogram.record(dto.getPrice().doubleValue());
+		
 		URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(item.getId()).toUri();
 		return ResponseEntity.created(uri).body(item);
 	}

@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Pod
+metadata:
+ name: money-master-db-pod
+ labels:
+  tier: database
+spec:
+ containers:
+ - image: kuntze/money-master-db:1.0
+   name: moneymasterdb
+   envFrom:
+   - configMapRef:
+      name: money-master-db-cm
+   ports:
+   - containerPort: 5432

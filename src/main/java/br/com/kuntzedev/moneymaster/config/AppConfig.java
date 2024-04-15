@@ -28,4 +28,9 @@ public class AppConfig {
 	JwtTokenStore store() {
 		return new JwtTokenStore(converter());
 	}
+	
+//	@Bean
+//	MeterRegistryCustomizer<MeterRegistry> metricsCommonTags() {
+//	  return registry -> registry.config().commonTags("application", "money-master");
+//	}
 }

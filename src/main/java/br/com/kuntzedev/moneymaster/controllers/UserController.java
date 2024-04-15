@@ -33,6 +33,8 @@ import br.com.kuntzedev.moneymaster.dtos.UserInsertDTO;
 import br.com.kuntzedev.moneymaster.dtos.tokens.TokenPasswordDTO;
 import br.com.kuntzedev.moneymaster.services.UserService;
 import br.com.kuntzedev.moneymaster.services.exceptions.InvalidPasswordException;
+import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.MeterRegistry;
 
 @RestController
 @RequestMapping(value = "/users")
@@ -48,6 +50,12 @@ public class UserController {
 	private Environment env;
 
 	private static String FRONT_APP_URL = "";
+	
+	private final MeterRegistry meterRegistry;
+	
+	public UserController(MeterRegistry meterRegistry) {
+		this.meterRegistry = meterRegistry;
+	}
 	
 	/**
 	 * -------------- GETS --------------
@@ -130,9 +138,15 @@ public class UserController {
 			Errors errors) {
 		UserBasicDTO user = userService.register(dto);
 		URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(user.getId()).toUri();
+		
+		Counter counter = Counter.builder("user_registry_count").tag("user_registry", "register")
+				.description("The amount of times the user register service has been used").register(meterRegistry);
 
 		String appUrl = getAppUrl(request);
 		eventPublisher.publishEvent(new OnRegistrationCompleteEvent(user, request.getLocale(), appUrl));
+		
+		counter.increment(1.0);
+		
 		return ResponseEntity.created(uri).body(user);
 	}
 

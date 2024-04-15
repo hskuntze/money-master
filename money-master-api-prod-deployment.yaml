@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+ name: money-master-api-prod-deployment
+spec:
+ replicas: 4
+ selector:
+  matchLabels:
+   tier: prod-backend
+ template:
+  metadata:
+   name: money-master-api-pod
+   labels:
+    tier: prod-backend
+  spec:
+   containers:
+    - image: kuntze/money-master-api-prod:1.17
+      name: money-master-api-pod
+      #volumeMounts:
+       #- name: prometheus-config
+         #mountPath: /etc/prometheus
+         #subPath: prometheus.yaml
+      readinessProbe:
+       httpGet:
+        path: /actuator/health
+        port: 8080
+       initialDelaySeconds: 10
+       periodSeconds: 3
+       failureThreshold: 3
+      livenessProbe:
+       httpGet:
+        path: /actuator/health
+        port: 8080
+       periodSeconds: 5	
+       failureThreshold: 3
