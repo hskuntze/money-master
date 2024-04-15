@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+ name: prometheus-pod
+spec:
+ replicas: 1
+ selector:
+  matchLabels:
+   tier: prometheus
+ template:
+  metadata:
+   labels:
+    tier: prometheus
+  spec:
+   containers:
+    - image: prom/prometheus:latest
+      name: prometheus-pod
+      ports:
+       - containerPort: 9090
+      volumeMounts:
+       - name: prometheus-data
+         mountPath: /prometheus/data
+       - name: prometheus-config
+         mountPath: /etc/prometheus
+      command:
+       - "/bin/prometheus"
+       - "--config.file=/etc/prometheus/prometheus.yaml"
+       - "--storage.tsdb.path=/prometheus"
+   volumes:
+    - name: prometheus-data
+      persistentVolumeClaim:
+       claimName: prometheus-data
+    - name: prometheus-config
+      configMap:
+       name: prometheus-config

@@ -22,6 +22,8 @@ import br.com.kuntzedev.moneymaster.repositories.WishlistRepository;
 import br.com.kuntzedev.moneymaster.services.exceptions.ResourceNotFoundException;
 import br.com.kuntzedev.moneymaster.services.exceptions.UnprocessableRequestException;
 import br.com.kuntzedev.moneymaster.services.scraping.ScrapingMediatorService;
+import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.MeterRegistry;
 
 @Service
 public class ItemService {
@@ -41,8 +43,15 @@ public class ItemService {
 	@Autowired
 	private ScrapingMediatorService scrapingMediator;
 	
+	private final Counter registryCounter;
+	
 	private static final String RNFE = "Resource not found in the database.";
 	private static final String NULL_PARAM = "Null parameter.";
+	
+	public ItemService(MeterRegistry meterRegistry) {
+		registryCounter = Counter.builder("item_register_counter").tag("item_registry", "register")
+				.description("The amount of times an item has been registered.").register(meterRegistry);
+	}
 	
 	@Transactional(readOnly = true)
 	public Page<ItemDTO> findAll(Pageable pageable) {
@@ -90,6 +99,8 @@ public class ItemService {
 			
 			ItemHistory history = initializeHistory(entity);
 			entity.setItemHistory(history);
+			
+			registryCounter.increment(1);
 			
 			return new ItemDTO(entity);
 		} else {

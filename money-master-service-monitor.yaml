@@ -1,0 +1,14 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+ name: money-master-sm
+spec:
+ selector:
+  tier: prod-backend
+ namespaceSelector:
+  matchNames:
+   - default
+ endpoints:
+  - port: "8080"
+    path: /actuator/prometheus
+    interval: 15s

@@ -20,6 +20,8 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import br.com.kuntzedev.moneymaster.dtos.VaultDTO;
 import br.com.kuntzedev.moneymaster.dtos.VaultSavingsResponseDTO;
 import br.com.kuntzedev.moneymaster.services.VaultService;
+import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.MeterRegistry;
 
 @RestController
 @RequestMapping(value = "/vaults")
@@ -27,6 +29,12 @@ public class VaultController {
 
 	@Autowired
 	private VaultService vaultService;
+	
+	private MeterRegistry meterRegistry;
+	
+	public VaultController(MeterRegistry meterRegistry) {
+		this.meterRegistry = meterRegistry;
+	}
 	
 	/**
 	 * -------------- GETS --------------
@@ -75,6 +83,11 @@ public class VaultController {
 	 */
 	@PutMapping(value = "/update/{id}")
 	public ResponseEntity<VaultDTO> update(@PathVariable Long id, @RequestBody VaultDTO dto) {
+		Counter counter = Counter.builder("savings_counter").tag("savings_counter", "savings")
+				.register(meterRegistry);
+		
+		counter.increment(1.0);
+		
 		return ResponseEntity.ok().body(vaultService.update(id, dto));
 	}
 	
