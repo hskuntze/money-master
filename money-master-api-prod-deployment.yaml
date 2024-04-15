@@ -14,7 +14,7 @@ spec:
     tier: prod-backend
   spec:
    containers:
-    - image: kuntze/money-master-api-prod:1.17
+    - image: kuntze/money-master-api-prod:latest
       name: money-master-api-pod
       #volumeMounts:
        #- name: prometheus-config
